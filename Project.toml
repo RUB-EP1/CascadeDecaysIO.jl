@@ -1,7 +1,7 @@
 name = "CascadeDecaysIO"
 uuid = "9d2b3f4d-3b61-4f8e-9b8d-4a0e6f3c8c21"
-authors = ["RUB-EP1"]
 version = "0.1.0"
+authors = ["RUB-EP1"]
 
 [deps]
 CascadeDecays = "fffe189e-c188-4e56-b22b-870ae3b23d6b"
@@ -10,12 +10,13 @@ HadronicLineshapes = "49c9d978-1f9d-4e96-a984-0a9783c0b9bf"
 InstructionalDecayTrees = "1d606af4-d0f8-4ff7-bc8d-eb3f657b7647"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
-CascadeDecays = {path = "../CascadeDecays.jl"}
-FourVectors = {url = "https://github.com/mmikhasenko/FourVectors.jl", rev = "0ce8f0d419dcac15ba9e261c088292a1f6f6fe0e"}
-InstructionalDecayTrees = {url = "https://github.com/mmikhasenko/InstructionalDecayTrees.jl", rev = "9afbe76f45783ca49ef0d7ecde8b537eceec125a"}
+CascadeDecays = {path = "../CascadeDecays"}
+FourVectors = {rev = "v0.3.4", url = "https://github.com/mmikhasenko/FourVectors.jl"}
+InstructionalDecayTrees = {url = "https://github.com/mmikhasenko/InstructionalDecayTrees.jl"}
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

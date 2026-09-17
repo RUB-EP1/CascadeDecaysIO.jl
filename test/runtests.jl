@@ -6,13 +6,13 @@ using JSON
 using ThreeBodyDecays: RecouplingLS
 
 @testset "CascadeDecaysIO writer" begin
-    system = CascadeSystem(
-        SystemSpins(0, 0, 0, 0; two_h0 = 0),
-        SystemMasses(1.0, 1.1, 1.2, 1.3; m0 = 5.0),
-    )
+    spins = SystemSpins(0, 0, 0, 0; two_h0 = 0)
+    masses = SystemMasses(1.0, 1.1, 1.2, 1.3; m0 = 5.0)
+    system = CascadeSystem(spins, masses)
     topology = DecayTopology((((1, 2), 3), 4))
     chain = DecayChain(
-        topology;
+        topology,
+        spins;
         propagators = (
             ((1, 2), 3) => Propagator(2, BreitWigner(2.4, 0.1)),
             (1, 2) => Propagator(0, ConstantLineshape(1.0 + 0.0im)),
@@ -45,6 +45,12 @@ using ThreeBodyDecays: RecouplingLS
     @test decay_description["reference_topology"] == [[[1, 2], 3], 4]
     @test decay_description["chains"][1]["weight"] == "1.0 + 0.0i"
     @test length(full_appendix) >= length(appendix)
+
+    # Test CascadeDecay container serialization
+    cascade = CascadeDecay((chain,), topology; couplings = (1.0 + 0.0im,), names = ("test_chain",))
+    cd_desc, cd_app = serializeToDict(cascade, masses; particle_labels = ("D0", "pi+", "D-", "K+", "B+"))
+    @test cd_desc["reference_topology"] == [[[1, 2], 3], 4]
+    @test cd_desc["chains"][1]["name"] == "test_chain"
 
     document = amplitudeSerializationDict(
         system,
@@ -96,6 +102,24 @@ using ThreeBodyDecays: RecouplingLS
     @test document["functions"][end]["name"] == "constant_one"
     @test document["custom_section"]["kept"] == true
 
+    # Paired topology test ((1, 2), (3, 4))
+    dk_top = DecayTopology(((1, 2), (3, 4)))
+    dk_chain = DecayChain(
+        dk_top,
+        spins;
+        propagators = (
+            (1, 2) => Propagator(0, ConstantLineshape(1.0 + 0.0im)),
+            (3, 4) => Propagator(2, BreitWigner(2.4, 0.1)),
+        ),
+        vertices = (
+            ((1, 2), (3, 4)) => Vertex(RecouplingLS((0, 2))),
+            (3, 4) => Vertex(RecouplingLS((0, 2))),
+            (1, 2) => Vertex(RecouplingLS((0, 0))),
+        ),
+    )
+    dk_dict, _ = serializeToDict(dk_chain; name = "dk_test")
+    @test dk_dict["topology"] == [[1, 2], [3, 4]]
+
     mktempdir() do dir
         output_path = joinpath(dir, "model.json")
         returned_path = writeJson(output_path, document)
@@ -103,5 +127,13 @@ using ThreeBodyDecays: RecouplingLS
         parsed = JSON.parsefile(output_path)
         @test parsed["distributions"][1]["name"] == "test_model"
         @test parsed["functions"][end]["name"] == "constant_one"
+
+        # Test reader and round-trip
+        read_cascade, read_system, read_doc = readJson(output_path)
+        @test length(read_cascade.chains) == 1
+        @test read_cascade.names[1] == "test_chain"
+        @test read_cascade.couplings[1] ≈ 1.0 + 0.0im
+        @test read_system.masses.m0 == 5.0
+        @test read_system.masses.finals == [1.0, 1.1, 1.2, 1.3]
     end
 end

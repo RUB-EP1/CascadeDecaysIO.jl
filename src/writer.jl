@@ -236,7 +236,7 @@ function _serialize_lineshape(lineshape::HadronicLineshapes.BreitWigner, variabl
     _Appendix()
 end
 
-function _serialize_lineshape(lineshape::HadronicLineshapes.MultichannelBreitWigner, variable_name)
+function _serialize_multichannel_bw(lineshape, variable_name)
     channels = [
         LittleDict{String,Any}(
             "gsq" => _json_scalar(channel.gsq),
@@ -255,7 +255,35 @@ function _serialize_lineshape(lineshape::HadronicLineshapes.MultichannelBreitWig
     _Appendix()
 end
 
+_serialize_lineshape(lineshape::HadronicLineshapes.MultichannelBreitWigner, variable_name) =
+    _serialize_multichannel_bw(lineshape, variable_name)
+
 function _serialize_lineshape(lineshape, variable_name)
+    T = typeof(lineshape)
+    if hasfield(T, :channels) && hasfield(T, :m)
+        return _serialize_multichannel_bw(lineshape, variable_name)
+    end
+    if hasfield(T, :αβ) && hasfield(T, :m0)
+        αβ = lineshape.αβ
+        m0 = lineshape.m0
+        α = real(αβ)
+        β = imag(αβ)
+        expr = "-exp(-(($α) + i*($β)) * ($variable_name - $(m0^2)))"
+        return LittleDict{String,Any}(
+            "type" => "custom",
+            "expression" => expr,
+            "x" => variable_name,
+        ),
+        _Appendix()
+    end
+    if hasfield(T, :expression)
+        return LittleDict{String,Any}(
+            "type" => "custom",
+            "expression" => string(lineshape.expression),
+            "x" => variable_name,
+        ),
+        _Appendix()
+    end
     throw(ArgumentError("unsupported lineshape type $(typeof(lineshape)) for variable $variable_name"))
 end
 
@@ -323,7 +351,7 @@ function serializeToDict(chain::DecayChain; name::AbstractString = "cascade_chai
     functions = LittleDict{String,Any}()
     topology = chain.topology
 
-    propagator_entries = map(zip(chain.propagators, chain.propagator_two_js, propagating_line_inds(chain))) do (lineshape, two_j, line_ind)
+    propagator_entries = map(zip(chain.propagators, propagator_two_js(chain), propagating_line_inds(chain))) do (lineshape, two_j, line_ind)
         prop_dict, fn_pair, fn_appendix = _serialize_propagator(topology, lineshape, two_j, line_ind)
         functions[fn_pair.first] = fn_pair.second
         _merge_appendix!(appendix, fn_appendix)
@@ -406,6 +434,41 @@ function serializeToDict(
         "chains" => chains,
     )
     return decay_description, appendix
+end
+
+"""
+    serializeToDict(cascade::CascadeDecay, masses::SystemMasses; particle_labels=nothing, reference_topology=nothing)
+
+Serialize a concrete `CascadeDecay` and external `masses` to a decay-description dictionary.
+"""
+function serializeToDict(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    particle_labels = nothing,
+    reference_topology = nothing,
+)
+    first_chain = first(cascade.chains)
+    spins = SystemSpins(
+        first_chain.line_two_js[final_line_inds(first_chain)]...;
+        two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
+    )
+    system = CascadeSystem(spins, masses)
+    weighted_chains = [
+        cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
+        for i in eachindex(cascade.chains)
+    ]
+    ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
+    return serializeToDict(system, weighted_chains; particle_labels, reference_topology = ref_top)
+end
+
+function serializeToDict(
+    cascade::CascadeDecay;
+    masses::Union{SystemMasses, Nothing} = nothing,
+    particle_labels = nothing,
+    reference_topology = nothing,
+)
+    isnothing(masses) && throw(ArgumentError("`masses` must be provided when serializing a CascadeDecay"))
+    return serializeToDict(cascade, masses; particle_labels, reference_topology)
 end
 
 function _as_vector(value)
@@ -703,4 +766,50 @@ function writeJson(
     kwargs...,
 )
     return writeJson(path, amplitudeSerializationDict(system, weighted_chains; kwargs...))
+end
+
+"""
+    amplitudeSerializationDict(cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+
+Build a complete amplitude-serialization dictionary from a `CascadeDecay` container and its external `masses`.
+"""
+function amplitudeSerializationDict(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    particle_labels = nothing,
+    reference_topology = nothing,
+    kwargs...,
+)
+    first_chain = first(cascade.chains)
+    spins = SystemSpins(
+        first_chain.line_two_js[final_line_inds(first_chain)]...;
+        two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
+    )
+    system = CascadeSystem(spins, masses)
+    weighted_chains = [
+        cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
+        for i in eachindex(cascade.chains)
+    ]
+    ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
+    return amplitudeSerializationDict(
+        system,
+        weighted_chains;
+        particle_labels,
+        reference_topology = ref_top,
+        kwargs...,
+    )
+end
+
+"""
+    writeJson(path, cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+
+Build a complete amplitude-serialization dictionary for `cascade` and write it to `path`.
+"""
+function writeJson(
+    path::AbstractString,
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    kwargs...,
+)
+    return writeJson(path, amplitudeSerializationDict(cascade, masses; kwargs...))
 end
