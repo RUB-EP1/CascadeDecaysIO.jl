@@ -97,6 +97,23 @@ function _build_function_workspace(functions_list)
                 ) for ch in fn["channels"]
             ]
             workspace[name] = HadronicLineshapes.MultichannelBreitWigner(m, channels)
+        elseif fn_type == "TFPWAMultichannelBreitWigner"
+            m = Float64(fn["mass"])
+            channels = [
+                (;
+                    gsq = Float64(ch["gsq"]),
+                    ma = Float64(ch["ma"]),
+                    mb = Float64(ch["mb"]),
+                    l = Int(ch["l"]),
+                    d = Float64(ch["d"]),
+                ) for ch in fn["channels"]
+            ]
+            workspace[name] = TFPWAMultichannelBreitWigner(m, channels)
+        elseif fn_type == "NRExpLineshape"
+            alpha = Float64(fn["alpha"])
+            beta = Float64(fn["beta"])
+            m0 = Float64(fn["m0"])
+            workspace[name] = NRExpLineshape(alpha + 1im * beta, m0)
         elseif fn_type == "custom"
             expr = fn["expression"]
             workspace[name] = CustomExpressionLineshape(expr, Dict{String,Any}())

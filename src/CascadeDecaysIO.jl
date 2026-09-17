@@ -99,8 +99,11 @@ export appendFunction!,
     setVariables!,
     writeJson,
     dict2instance,
-    readJson
+    readJson,
+    TFPWAMultichannelBreitWigner,
+    NRExpLineshape
 
+include("lineshapes.jl")
 include("writer.jl")
 include("reader.jl")
 

@@ -236,7 +236,7 @@ function _serialize_lineshape(lineshape::HadronicLineshapes.BreitWigner, variabl
     _Appendix()
 end
 
-function _serialize_multichannel_bw(lineshape, variable_name)
+function _serialize_multichannel_bw(lineshape, variable_name; type_name = "MultichannelBreitWigner")
     channels = [
         LittleDict{String,Any}(
             "gsq" => _json_scalar(channel.gsq),
@@ -247,7 +247,7 @@ function _serialize_multichannel_bw(lineshape, variable_name)
         ) for channel in lineshape.channels
     ]
     return LittleDict{String,Any}(
-        "type" => "MultichannelBreitWigner",
+        "type" => type_name,
         "mass" => lineshape.m,
         "channels" => channels,
         "x" => variable_name,
@@ -256,12 +256,16 @@ function _serialize_multichannel_bw(lineshape, variable_name)
 end
 
 _serialize_lineshape(lineshape::HadronicLineshapes.MultichannelBreitWigner, variable_name) =
-    _serialize_multichannel_bw(lineshape, variable_name)
+    _serialize_multichannel_bw(lineshape, variable_name; type_name = "MultichannelBreitWigner")
+
+_serialize_lineshape(lineshape::TFPWAMultichannelBreitWigner, variable_name) =
+    _serialize_multichannel_bw(lineshape, variable_name; type_name = "TFPWAMultichannelBreitWigner")
 
 function _serialize_lineshape(lineshape, variable_name)
     T = typeof(lineshape)
     if hasfield(T, :channels) && hasfield(T, :m)
-        return _serialize_multichannel_bw(lineshape, variable_name)
+        is_tfpwa = contains(string(nameof(T)), "TFPWA")
+        return _serialize_multichannel_bw(lineshape, variable_name; type_name = is_tfpwa ? "TFPWAMultichannelBreitWigner" : "MultichannelBreitWigner")
     end
     if hasfield(T, :αβ) && hasfield(T, :m0)
         αβ = lineshape.αβ
@@ -270,8 +274,11 @@ function _serialize_lineshape(lineshape, variable_name)
         β = imag(αβ)
         expr = "-exp(-(($α) + i*($β)) * ($variable_name - $(m0^2)))"
         return LittleDict{String,Any}(
-            "type" => "custom",
+            "type" => "NRExpLineshape",
             "expression" => expr,
+            "alpha" => α,
+            "beta" => β,
+            "m0" => m0,
             "x" => variable_name,
         ),
         _Appendix()
