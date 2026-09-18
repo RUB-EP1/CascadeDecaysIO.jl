@@ -179,13 +179,16 @@ function serializeToDict(h::ThreeBodyDecays.ParityRecoupling)
     _Appendix()
 end
 
-function _serialize_formfactor(ff)
-    ff_name, ff_appendix = serializeToDict(ff)
-    ff_name == "" && return ff_name, ff_appendix
+_formfactor_name(ff::HadronicLineshapes.BlattWeisskopf) = "BlattWeisskopf_L$(HadronicLineshapes.orbital_momentum(ff))_d$(ff.d)"
+_formfactor_name(ff) = _payload_name("formfactor", ff)
 
-    name = _payload_name("formfactor", ff)
-    ff_name["name"] = name
-    return name, _Appendix(name => ff_name)
+function _serialize_formfactor(ff)
+    ff_dict, ff_appendix = serializeToDict(ff)
+    ff_dict == "" && return ff_dict, ff_appendix
+
+    name = _formfactor_name(ff)
+    ff_dict["name"] = name
+    return name, _Appendix(name => ff_dict)
 end
 
 """
@@ -283,8 +286,43 @@ function _serialize_lineshape(lineshape, variable_name)
     throw(ArgumentError("unsupported lineshape type $(typeof(lineshape)) for variable $variable_name"))
 end
 
+function _lineshape_name(lineshape::ConstantLineshape, address)
+    val = lineshape.value
+    if val == 1.0 + 0.0im || val == 1.0
+        return "constant_one"
+    end
+    c_str = imag(val) == 0 ? string(real(val)) : "$(real(val))_$(imag(val))im"
+    return "constant_$(c_str)"
+end
+
+function _lineshape_name(lineshape::HadronicLineshapes.BreitWigner, address)
+    addr = _node_label(address)
+    m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
+    w_str = replace(string(round(_gamma(lineshape), digits=4)), "." => "p")
+    return "BW_$(addr)_m$(m_str)_w$(w_str)"
+end
+
+function _lineshape_name(lineshape::TFPWAMultichannelBreitWigner, address)
+    addr = _node_label(address)
+    m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
+    return "MultiChannelBW_$(addr)_m$(m_str)"
+end
+
+function _lineshape_name(lineshape, address)
+    T = typeof(lineshape)
+    addr = _node_label(address)
+    if hasfield(T, :channels) && hasfield(T, :m)
+        m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
+        return "MultiChannelBW_$(addr)_m$(m_str)"
+    elseif hasfield(T, :αβ) && hasfield(T, :m0)
+        m0_str = replace(string(round(lineshape.m0, digits=4)), "." => "p")
+        return "NRExp_$(addr)_m0$(m0_str)"
+    end
+    return _function_name("propagator", address, lineshape)
+end
+
 function _serialize_named_lineshape(lineshape, address)
-    name = _function_name("propagator", address, lineshape)
+    name = _lineshape_name(lineshape, address)
     if lineshape isa ConstantLineshape
         fn_dict, appendix = serializeToDict(lineshape)
     else
