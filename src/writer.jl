@@ -50,32 +50,17 @@ function _merge_appendix!(target, source)
 end
 
 """
-    serializeToDict(system::CascadeSystem; particle_labels=nothing)
+    serializeToDict(spins::Union{SystemSpins, SystemSpinParities}; particle_labels=nothing)
 
-Serialize the external particles of a `CascadeSystem` in the same kinematics
-shape used by ThreeBodyDecaysIO, generalized from three final states to `N`.
-
-Returns `(kinematics, appendix)`, where `kinematics` contains
-`"initial_state"` and `"final_state"` entries and `appendix` is empty.
-
-# Keyword Arguments
-
-- `particle_labels`: optional labels for all final-state particles followed by
-  the initial-state label. If omitted, labels default to `p1`, `p2`, ..., `X`.
-
-# Notes
-
-Spin values are emitted in ordinary angular-momentum units. Internally,
-`CascadeDecays.jl` stores doubled integer spins, so `two_h0 = 2` is emitted as
-`"spin" => 1`.
+Serialize external particle quantum numbers (labels, indices, spins) into kinematics dictionary.
+Masses are omitted so they can be provided event-dependently.
 """
 function serializeToDict(
-    system::CascadeSystem;
+    spins::Union{SystemSpins, SystemSpinParities};
     particle_labels = nothing,
 )
-    masses = system.masses
-    spins = system.quantum isa SystemSpinParities ? system.quantum.spins : system.quantum
-    n_final = length(masses.finals)
+    s = spins isa SystemSpinParities ? spins.spins : spins
+    n_final = length(s.finals)
     labels = isnothing(particle_labels) ? vcat(["p$i" for i in 1:n_final], ["X"]) : collect(particle_labels)
     length(labels) == n_final + 1 ||
         throw(ArgumentError("particle_labels must contain final-state labels followed by the initial-state label"))
@@ -83,21 +68,22 @@ function serializeToDict(
     system_dict = LittleDict{String,Any}(
         "initial_state" => LittleDict{String,Any}(
             "name" => labels[end],
-            "mass" => masses.m0,
             "index" => 0,
-            "spin" => _half_label(spins.two_h0),
+            "spin" => _half_label(s.two_h0),
         ),
         "final_state" => [
             LittleDict{String,Any}(
                 "name" => labels[i],
-                "mass" => masses.finals[i],
                 "index" => i,
-                "spin" => _half_label(spins.finals[i]),
+                "spin" => _half_label(s.finals[i]),
             ) for i in 1:n_final
         ],
     )
     return system_dict, _Appendix()
 end
+
+serializeToDict(system::CascadeSystem; particle_labels = nothing) =
+    serializeToDict(system.quantum; particle_labels)
 
 """
     serializeToDict(lineshape::ConstantLineshape)
@@ -236,7 +222,7 @@ function _serialize_lineshape(lineshape::HadronicLineshapes.BreitWigner, variabl
     _Appendix()
 end
 
-function _serialize_multichannel_bw(lineshape, variable_name; type_name = "MultichannelBreitWigner")
+function _serialize_multichannel_bw(lineshape, variable_name; type_name = "TFPWAMultichannelBreitWigner")
     channels = [
         LittleDict{String,Any}(
             "gsq" => _json_scalar(channel.gsq),
@@ -247,7 +233,9 @@ function _serialize_multichannel_bw(lineshape, variable_name; type_name = "Multi
         ) for channel in lineshape.channels
     ]
     return LittleDict{String,Any}(
-        "type" => type_name,
+        "type" => "custom",
+        "subtype" => type_name,
+        "expression" => "BW(sigma, m0, sum(gsq * sigma * 2p/sqrt(sigma) * FF(p)^2) / m0)",
         "mass" => lineshape.m,
         "channels" => channels,
         "x" => variable_name,
@@ -274,7 +262,8 @@ function _serialize_lineshape(lineshape, variable_name)
         β = imag(αβ)
         expr = "-exp(-(($α) + i*($β)) * ($variable_name - $(m0^2)))"
         return LittleDict{String,Any}(
-            "type" => "NRExpLineshape",
+            "type" => "custom",
+            "subtype" => "NRExpLineshape",
             "expression" => expr,
             "alpha" => α,
             "beta" => β,
@@ -413,13 +402,13 @@ This method writes dictionaries only. It does not write JSON files and it does
 not provide read-back support.
 """
 function serializeToDict(
-    system::CascadeSystem,
+    spins::Union{SystemSpins, SystemSpinParities},
     weighted_chains;
     particle_labels = nothing,
     reference_topology = nothing,
 )
     appendix = _Appendix()
-    kinematics, kin_appendix = serializeToDict(system; particle_labels)
+    kinematics, kin_appendix = serializeToDict(spins; particle_labels)
     _merge_appendix!(appendix, kin_appendix)
 
     chain_entries = map(weighted_chains) do entry
@@ -443,14 +432,17 @@ function serializeToDict(
     return decay_description, appendix
 end
 
-"""
-    serializeToDict(cascade::CascadeDecay, masses::SystemMasses; particle_labels=nothing, reference_topology=nothing)
+serializeToDict(system::CascadeSystem, weighted_chains; kwargs...) =
+    serializeToDict(system.quantum, weighted_chains; kwargs...)
 
-Serialize a concrete `CascadeDecay` and external `masses` to a decay-description dictionary.
+"""
+    serializeToDict(cascade::CascadeDecay; particle_labels=nothing, reference_topology=nothing)
+
+Serialize a concrete `CascadeDecay` to a decay-description dictionary.
 """
 function serializeToDict(
-    cascade::CascadeDecay,
-    masses::SystemMasses;
+    cascade::CascadeDecay;
+    masses = nothing,
     particle_labels = nothing,
     reference_topology = nothing,
 )
@@ -459,23 +451,21 @@ function serializeToDict(
         first_chain.line_two_js[final_line_inds(first_chain)]...;
         two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
     )
-    system = CascadeSystem(spins, masses)
     weighted_chains = [
         cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
         for i in eachindex(cascade.chains)
     ]
     ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
-    return serializeToDict(system, weighted_chains; particle_labels, reference_topology = ref_top)
+    return serializeToDict(spins, weighted_chains; particle_labels, reference_topology = ref_top)
 end
 
 function serializeToDict(
-    cascade::CascadeDecay;
-    masses::Union{SystemMasses, Nothing} = nothing,
+    cascade::CascadeDecay,
+    masses::SystemMasses;
     particle_labels = nothing,
     reference_topology = nothing,
 )
-    isnothing(masses) && throw(ArgumentError("`masses` must be provided when serializing a CascadeDecay"))
-    return serializeToDict(cascade, masses; particle_labels, reference_topology)
+    return serializeToDict(cascade; masses, particle_labels, reference_topology)
 end
 
 function _as_vector(value)
@@ -709,7 +699,7 @@ are provided.
 - `parameter_points`: written as the top-level `"parameter_points"` section.
 """
 function amplitudeSerializationDict(
-    system::CascadeSystem,
+    spins::Union{SystemSpins, SystemSpinParities, CascadeSystem},
     weighted_chains;
     particle_labels = nothing,
     reference_topology = nothing,
@@ -722,7 +712,7 @@ function amplitudeSerializationDict(
     validation = nothing,
 )
     decay_description, appendix = serializeToDict(
-        system,
+        spins,
         weighted_chains;
         particle_labels,
         reference_topology,
@@ -760,7 +750,7 @@ function writeJson(path::AbstractString, document::AbstractDict; indent::Integer
 end
 
 """
-    writeJson(path, system::CascadeSystem, weighted_chains; kwargs...)
+    writeJson(path, system::Union{CascadeSystem, SystemSpins}, weighted_chains; kwargs...)
 
 Build a complete amplitude-serialization dictionary with
 `amplitudeSerializationDict(system, weighted_chains; kwargs...)`, write it to
@@ -768,7 +758,7 @@ Build a complete amplitude-serialization dictionary with
 """
 function writeJson(
     path::AbstractString,
-    system::CascadeSystem,
+    system::Union{CascadeSystem, SystemSpins},
     weighted_chains;
     kwargs...,
 )
@@ -776,13 +766,13 @@ function writeJson(
 end
 
 """
-    amplitudeSerializationDict(cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+    amplitudeSerializationDict(cascade::CascadeDecay; kwargs...)
 
-Build a complete amplitude-serialization dictionary from a `CascadeDecay` container and its external `masses`.
+Build a complete amplitude-serialization dictionary from a `CascadeDecay` container.
 """
 function amplitudeSerializationDict(
-    cascade::CascadeDecay,
-    masses::SystemMasses;
+    cascade::CascadeDecay;
+    masses = nothing,
     particle_labels = nothing,
     reference_topology = nothing,
     kwargs...,
@@ -792,14 +782,13 @@ function amplitudeSerializationDict(
         first_chain.line_two_js[final_line_inds(first_chain)]...;
         two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
     )
-    system = CascadeSystem(spins, masses)
     weighted_chains = [
         cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
         for i in eachindex(cascade.chains)
     ]
     ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
     return amplitudeSerializationDict(
-        system,
+        spins,
         weighted_chains;
         particle_labels,
         reference_topology = ref_top,
@@ -807,16 +796,32 @@ function amplitudeSerializationDict(
     )
 end
 
+function amplitudeSerializationDict(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    kwargs...,
+)
+    return amplitudeSerializationDict(cascade; masses, kwargs...)
+end
+
 """
-    writeJson(path, cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+    writeJson(path, cascade::CascadeDecay; kwargs...)
 
 Build a complete amplitude-serialization dictionary for `cascade` and write it to `path`.
 """
+function writeJson(
+    path::AbstractString,
+    cascade::CascadeDecay;
+    kwargs...,
+)
+    return writeJson(path, amplitudeSerializationDict(cascade; kwargs...))
+end
+
 function writeJson(
     path::AbstractString,
     cascade::CascadeDecay,
     masses::SystemMasses;
     kwargs...,
 )
-    return writeJson(path, amplitudeSerializationDict(cascade, masses; kwargs...))
+    return writeJson(path, cascade; masses, kwargs...)
 end

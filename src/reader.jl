@@ -62,11 +62,16 @@ struct CustomExpressionLineshape <: HadronicLineshapes.AbstractFlexFunc
 end
 (ls::CustomExpressionLineshape)(σ) = 1.0 + 0.0im
 
-function _build_function_workspace(functions_list)
+function _build_function_workspace(functions_list; custom_functions = Dict{String,Any}())
     workspace = Dict{String,Any}()
     for fn in functions_list
         name = fn["name"]
+        if haskey(custom_functions, name)
+            workspace[name] = custom_functions[name]
+            continue
+        end
         fn_type = get(fn, "type", "")
+        subtype = get(fn, "subtype", "")
         if fn_type == "BlattWeisskopf"
             l = Int(fn["l"])
             r = Float64(fn["radius"])
@@ -85,7 +90,7 @@ function _build_function_workspace(functions_list)
             l = Int(fn["l"])
             d = Float64(fn["d"])
             workspace[name] = HadronicLineshapes.BreitWigner(m, w, ma, mb, l, d)
-        elseif fn_type == "MultichannelBreitWigner"
+        elseif fn_type == "MultichannelBreitWigner" || (fn_type == "custom" && subtype == "MultichannelBreitWigner")
             m = Float64(fn["mass"])
             channels = [
                 (;
@@ -97,7 +102,7 @@ function _build_function_workspace(functions_list)
                 ) for ch in fn["channels"]
             ]
             workspace[name] = HadronicLineshapes.MultichannelBreitWigner(m, channels)
-        elseif fn_type == "TFPWAMultichannelBreitWigner"
+        elseif fn_type == "TFPWAMultichannelBreitWigner" || (fn_type == "custom" && (subtype == "TFPWAMultichannelBreitWigner" || haskey(fn, "channels")))
             m = Float64(fn["mass"])
             channels = [
                 (;
@@ -109,13 +114,13 @@ function _build_function_workspace(functions_list)
                 ) for ch in fn["channels"]
             ]
             workspace[name] = TFPWAMultichannelBreitWigner(m, channels)
-        elseif fn_type == "NRExpLineshape"
+        elseif fn_type == "NRExpLineshape" || (fn_type == "custom" && (subtype == "NRExpLineshape" || (haskey(fn, "alpha") && haskey(fn, "beta"))))
             alpha = Float64(fn["alpha"])
             beta = Float64(fn["beta"])
             m0 = Float64(fn["m0"])
             workspace[name] = NRExpLineshape(alpha + 1im * beta, m0)
         elseif fn_type == "custom"
-            expr = fn["expression"]
+            expr = get(fn, "expression", "")
             workspace[name] = CustomExpressionLineshape(expr, Dict{String,Any}())
         else
             workspace[name] = fn
@@ -127,8 +132,8 @@ end
 """
     dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
 
-Deserialize a `CascadeSystem` (external kinematics: spins and masses) from an
-amplitude-serialization dictionary.
+Deserialize a `CascadeSystem` from an amplitude-serialization dictionary.
+If masses are absent from kinematics, they default to 0.0.
 """
 function dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
     kin = if haskey(dict, "kinematics")
@@ -144,10 +149,10 @@ function dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
     ini = kin["initial_state"]
     finals = sort(collect(kin["final_state"]), by = x -> x["index"])
 
-    m0 = Float64(ini["mass"])
+    m0 = haskey(ini, "mass") ? Float64(ini["mass"]) : 0.0
     two_h0 = _spin_to_two_j(ini["spin"])
 
-    final_m = [Float64(f["mass"]) for f in finals]
+    final_m = [haskey(f, "mass") ? Float64(f["mass"]) : 0.0 for f in finals]
     final_two_j = [_spin_to_two_j(f["spin"]) for f in finals]
 
     masses = SystemMasses(final_m...; m0 = m0)
@@ -156,14 +161,37 @@ function dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
 end
 
 """
-    dict2instance(::Type{CascadeDecay}, dict::AbstractDict; workspace=nothing)
+    dict2instance(::Type{SystemSpins}, dict::AbstractDict)
+
+Deserialize `SystemSpins` from an amplitude-serialization kinematics dictionary.
+"""
+function dict2instance(::Type{SystemSpins}, dict::AbstractDict)
+    kin = if haskey(dict, "kinematics")
+        dict["kinematics"]
+    elseif haskey(dict, "decay_description")
+        dict["decay_description"]["kinematics"]
+    elseif haskey(dict, "distributions")
+        dict["distributions"][1]["decay_description"]["kinematics"]
+    else
+        dict
+    end
+    ini = kin["initial_state"]
+    finals = sort(collect(kin["final_state"]), by = x -> x["index"])
+    two_h0 = _spin_to_two_j(ini["spin"])
+    final_two_j = [_spin_to_two_j(f["spin"]) for f in finals]
+    return SystemSpins(final_two_j...; two_h0 = two_h0)
+end
+
+"""
+    dict2instance(::Type{CascadeDecay}, dict::AbstractDict; custom_functions=Dict(), workspace=nothing)
 
 Deserialize a `CascadeDecay` model container from an amplitude-serialization document dictionary.
+Custom functions can be passed via `custom_functions` to be set by reasonable functions.
 """
-function dict2instance(::Type{CascadeDecay}, dict::AbstractDict; workspace = nothing)
+function dict2instance(::Type{CascadeDecay}, dict::AbstractDict; custom_functions = Dict{String,Any}(), workspace = nothing)
     functions_list = get(dict, "functions", Any[])
     if workspace === nothing
-        workspace = _build_function_workspace(functions_list)
+        workspace = _build_function_workspace(functions_list; custom_functions)
     end
 
     decay_desc = if haskey(dict, "decay_description")
@@ -175,8 +203,7 @@ function dict2instance(::Type{CascadeDecay}, dict::AbstractDict; workspace = not
     end
 
     kin = decay_desc["kinematics"]
-    system = dict2instance(CascadeSystem, kin)
-    spins = system.quantum
+    spins = dict2instance(SystemSpins, kin)
 
     ref_topology = DecayTopology(_json_to_tuple(decay_desc["reference_topology"]))
     chains_data = decay_desc["chains"]
@@ -234,13 +261,14 @@ function dict2instance(::Type{CascadeDecay}, dict::AbstractDict; workspace = not
 end
 
 """
-    readJson(path::AbstractString)
+    readJson(path::AbstractString; custom_functions=Dict{String,Any}())
 
 Read an amplitude-serialization JSON file and return `(cascade::CascadeDecay, system::CascadeSystem, document::LittleDict)`.
+`custom_functions` can be provided to set custom lineshapes to reasonable functions.
 """
-function readJson(path::AbstractString)
+function readJson(path::AbstractString; custom_functions = Dict{String,Any}())
     dict = JSON.parsefile(path; dicttype = LittleDict{String,Any})
-    cascade = dict2instance(CascadeDecay, dict)
+    cascade = dict2instance(CascadeDecay, dict; custom_functions)
     system = dict2instance(CascadeSystem, dict)
     return cascade, system, dict
 end

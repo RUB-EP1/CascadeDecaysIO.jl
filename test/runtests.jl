@@ -26,8 +26,10 @@ using ThreeBodyDecays: RecouplingLS
 
     kinematics, _ = serializeToDict(system; particle_labels = ("D0", "pi+", "D-", "K+", "B+"))
     @test kinematics["initial_state"]["index"] == 0
+    @test !haskey(kinematics["initial_state"], "mass")
     @test length(kinematics["final_state"]) == 4
     @test kinematics["final_state"][1]["name"] == "D0"
+    @test all(!haskey(f, "mass") for f in kinematics["final_state"])
 
     chain_dict, appendix = serializeToDict(chain; name = "test_chain")
     @test chain_dict["topology"] == [[[1, 2], 3], 4]
@@ -46,15 +48,26 @@ using ThreeBodyDecays: RecouplingLS
     @test decay_description["chains"][1]["weight"] == "1.0 + 0.0i"
     @test length(full_appendix) >= length(appendix)
 
-    # Test CascadeDecay container serialization
+    # Test CascadeDecay container serialization without masses
     cascade = CascadeDecay((chain,), topology; couplings = (1.0 + 0.0im,), names = ("test_chain",))
-    cd_desc, cd_app = serializeToDict(cascade, masses; particle_labels = ("D0", "pi+", "D-", "K+", "B+"))
+    cd_desc, cd_app = serializeToDict(cascade; particle_labels = ("D0", "pi+", "D-", "K+", "B+"))
     @test cd_desc["reference_topology"] == [[[1, 2], 3], 4]
     @test cd_desc["chains"][1]["name"] == "test_chain"
+    @test !haskey(cd_desc["kinematics"]["initial_state"], "mass")
+
+    # Test custom lineshapes serialization (TFPWAMultichannelBreitWigner and NRExpLineshape)
+    tfpwa_bw = TFPWAMultichannelBreitWigner(3.87, [(; gsq = 1.0, ma = 2.0, mb = 1.8, l = 0, d = 3.0)])
+    bw_dict, _ = CascadeDecaysIO._serialize_lineshape(tfpwa_bw, "m123sq")
+    @test bw_dict["type"] == "custom"
+    @test bw_dict["subtype"] == "TFPWAMultichannelBreitWigner"
+
+    nr_ls = NRExpLineshape(0.1 + 0.2im, 4.35)
+    nr_dict, _ = CascadeDecaysIO._serialize_lineshape(nr_ls, "m123sq")
+    @test nr_dict["type"] == "custom"
+    @test nr_dict["subtype"] == "NRExpLineshape"
 
     document = amplitudeSerializationDict(
-        system,
-        ["test_chain" => (1.0 + 0.0im, chain)];
+        cascade;
         particle_labels = ("D0", "pi+", "D-", "K+", "B+"),
         name = "test_model",
         variables = ["m12sq", "m123sq"],
@@ -133,7 +146,5 @@ using ThreeBodyDecays: RecouplingLS
         @test length(read_cascade.chains) == 1
         @test read_cascade.names[1] == "test_chain"
         @test read_cascade.couplings[1] ≈ 1.0 + 0.0im
-        @test read_system.masses.m0 == 5.0
-        @test read_system.masses.finals == [1.0, 1.1, 1.2, 1.3]
     end
 end
