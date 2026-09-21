@@ -39,10 +39,10 @@ function _line_address(topology::DecayTopology, line_ind::Integer)
 end
 
 function _function_name(prefix, address, payload)
-    return "$(prefix)_$(_node_label(address))_$(hash(payload))"
+    return "$(prefix)_$(_node_label(address))_$(nameof(typeof(payload)))"
 end
 
-_payload_name(prefix, payload) = "$(prefix)_$(hash(payload))"
+_payload_name(prefix, payload) = "$(prefix)_$(nameof(typeof(payload)))"
 
 function _merge_appendix!(target, source)
     merge!(target, source)
@@ -283,8 +283,12 @@ function _serialize_lineshape(lineshape, variable_name)
         ),
         _Appendix()
     end
+    _serialize_lineshape(lineshape::NamedLineshape, variable_name) =
+        _serialize_lineshape(lineshape.lineshape, variable_name)
     throw(ArgumentError("unsupported lineshape type $(typeof(lineshape)) for variable $variable_name"))
 end
+
+_lineshape_name(lineshape::NamedLineshape, address) = lineshape.name
 
 function _lineshape_name(lineshape::ConstantLineshape, address)
     val = lineshape.value
@@ -310,6 +314,9 @@ end
 
 function _lineshape_name(lineshape, address)
     T = typeof(lineshape)
+    if hasfield(T, :name) && !isempty(getfield(lineshape, :name))
+        return string(getfield(lineshape, :name))
+    end
     addr = _node_label(address)
     if hasfield(T, :channels) && hasfield(T, :m)
         m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
@@ -321,15 +328,16 @@ function _lineshape_name(lineshape, address)
     return _function_name("propagator", address, lineshape)
 end
 
-function _serialize_named_lineshape(lineshape, address)
-    name = _lineshape_name(lineshape, address)
-    if lineshape isa ConstantLineshape
-        fn_dict, appendix = serializeToDict(lineshape)
+function _serialize_named_lineshape(lineshape, address; name = nothing)
+    prop_name = isnothing(name) ? _lineshape_name(lineshape, address) : string(name)
+    inner = lineshape isa NamedLineshape ? lineshape.lineshape : lineshape
+    if inner isa ConstantLineshape
+        fn_dict, appendix = serializeToDict(inner)
     else
-        fn_dict, appendix = _serialize_lineshape(lineshape, _mass_variable(address))
+        fn_dict, appendix = _serialize_lineshape(inner, _mass_variable(address))
     end
-    fn_dict["name"] = name
-    return name, fn_dict, appendix
+    fn_dict["name"] = prop_name
+    return prop_name, fn_dict, appendix
 end
 
 function _json_topology(topology::DecayTopology)
@@ -340,15 +348,15 @@ function _json_topology(topology)
     return _json_node(topology)
 end
 
-function _serialize_propagator(topology::DecayTopology, lineshape, two_j::Integer, line_ind::Integer)
+function _serialize_propagator(topology::DecayTopology, lineshape, two_j::Integer, line_ind::Integer; name = nothing)
     address = _line_address(topology, line_ind)
-    name, fn_dict, appendix = _serialize_named_lineshape(lineshape, address)
+    prop_name, fn_dict, appendix = _serialize_named_lineshape(lineshape, address; name)
     prop_dict = LittleDict{String,Any}(
         "node" => _json_node(address),
         "spin" => _half_label(two_j),
-        "parametrization" => name,
+        "parametrization" => prop_name,
     )
-    return prop_dict, name => fn_dict, appendix
+    return prop_dict, prop_name => fn_dict, appendix
 end
 
 function _serialize_vertex(topology::DecayTopology, vertex, vertex_ind::Integer)
@@ -380,13 +388,30 @@ and non-trivial form factors.
 This method writes dictionaries only. It does not write JSON files and it does
 not provide read-back support.
 """
-function serializeToDict(chain::DecayChain; name::AbstractString = "cascade_chain")
+function serializeToDict(
+    chain::DecayChain;
+    name::AbstractString = "cascade_chain",
+    propagator_names = nothing,
+)
     appendix = _Appendix()
     functions = LittleDict{String,Any}()
     topology = chain.topology
 
-    propagator_entries = map(zip(chain.propagators, propagator_two_js(chain), propagating_line_inds(chain))) do (lineshape, two_j, line_ind)
-        prop_dict, fn_pair, fn_appendix = _serialize_propagator(topology, lineshape, two_j, line_ind)
+    p_lines = collect(zip(chain.propagators, propagator_two_js(chain), propagating_line_inds(chain)))
+    propagator_entries = map(enumerate(p_lines)) do (i, (lineshape, two_j, line_ind))
+        p_name = if !isnothing(propagator_names)
+            if propagator_names isa AbstractVector || propagator_names isa Tuple
+                (1 <= i <= length(propagator_names)) ? propagator_names[i] : nothing
+            elseif propagator_names isa AbstractDict
+                addr = _line_address(topology, line_ind)
+                get(propagator_names, addr, get(propagator_names, line_ind, nothing))
+            else
+                string(propagator_names)
+            end
+        else
+            nothing
+        end
+        prop_dict, fn_pair, fn_appendix = _serialize_propagator(topology, lineshape, two_j, line_ind; name = p_name)
         functions[fn_pair.first] = fn_pair.second
         _merge_appendix!(appendix, fn_appendix)
         prop_dict
@@ -407,6 +432,7 @@ function serializeToDict(chain::DecayChain; name::AbstractString = "cascade_chai
     )
     return chain_dict, appendix
 end
+
 
 function _chain_name_weight_model(entry)
     name, payload = entry
@@ -444,6 +470,7 @@ function serializeToDict(
     weighted_chains;
     particle_labels = nothing,
     reference_topology = nothing,
+    propagator_names = nothing,
 )
     appendix = _Appendix()
     kinematics, kin_appendix = serializeToDict(spins; particle_labels)
@@ -451,7 +478,12 @@ function serializeToDict(
 
     chain_entries = map(weighted_chains) do entry
         name, weight, chain = _chain_name_weight_model(entry)
-        chain_dict, chain_appendix = serializeToDict(chain; name)
+        chain_p_names = if !isnothing(propagator_names) && propagator_names isa AbstractDict
+            get(propagator_names, name, propagator_names)
+        else
+            propagator_names
+        end
+        chain_dict, chain_appendix = serializeToDict(chain; name, propagator_names = chain_p_names)
         _merge_appendix!(appendix, chain_appendix)
         chain_dict["weight"] = _weight_string(weight)
         chain_dict
@@ -474,7 +506,7 @@ serializeToDict(system::CascadeSystem, weighted_chains; kwargs...) =
     serializeToDict(system.quantum, weighted_chains; kwargs...)
 
 """
-    serializeToDict(cascade::CascadeDecay; particle_labels=nothing, reference_topology=nothing)
+    serializeToDict(cascade::CascadeDecay; particle_labels=nothing, reference_topology=nothing, propagator_names=nothing)
 
 Serialize a concrete `CascadeDecay` to a decay-description dictionary.
 """
@@ -483,6 +515,7 @@ function serializeToDict(
     masses = nothing,
     particle_labels = nothing,
     reference_topology = nothing,
+    propagator_names = nothing,
 )
     first_chain = first(cascade.chains)
     spins = SystemSpins(
@@ -494,8 +527,9 @@ function serializeToDict(
         for i in eachindex(cascade.chains)
     ]
     ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
-    return serializeToDict(spins, weighted_chains; particle_labels, reference_topology = ref_top)
+    return serializeToDict(spins, weighted_chains; particle_labels, reference_topology = ref_top, propagator_names)
 end
+
 
 function serializeToDict(
     cascade::CascadeDecay,
@@ -748,13 +782,16 @@ function amplitudeSerializationDict(
     misc = nothing,
     parameter_points = nothing,
     validation = nothing,
+    propagator_names = nothing,
 )
     decay_description, appendix = serializeToDict(
         spins,
         weighted_chains;
         particle_labels,
         reference_topology,
+        propagator_names,
     )
+
     document = LittleDict{String,Any}(
         "distributions" => [
             _default_distribution(

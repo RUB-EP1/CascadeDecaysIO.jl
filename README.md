@@ -183,8 +183,9 @@ The `decay_description` dictionary follows this structure:
       "weight": "1.0 + 0.0i",
       "topology": [[[1, 2], 3], 4],
       "propagators": [
-        {"node": [[1, 2], 3], "spin": 1, "parametrization": "propagator_1_2_3_..."}
+        {"node": [[1, 2], 3], "spin": 1, "parametrization": "BW_1_2_3"}
       ],
+
       "vertices": [
         {"node": [[[1, 2], 3], 4], "type": "ls", "l": 0, "s": 1, "formfactor": ""}
       ]

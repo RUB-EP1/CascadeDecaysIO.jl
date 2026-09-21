@@ -133,6 +133,32 @@ using ThreeBodyDecays: RecouplingLS
     dk_dict, _ = serializeToDict(dk_chain; name = "dk_test")
     @test dk_dict["topology"] == [[1, 2], [3, 4]]
 
+    # Test NamedLineshape and explicit propagator_names
+    named_bw = NamedLineshape("lineshape_custom_res", BreitWigner(2.4, 0.1))
+    named_chain = DecayChain(
+        topology,
+        spins;
+        propagators = (
+            ((1, 2), 3) => Propagator(2, named_bw),
+            (1, 2) => Propagator(0, ConstantLineshape(1.0 + 0.0im)),
+        ),
+        vertices = (
+            (((1, 2), 3), 4) => Vertex(RecouplingLS((0, 2))),
+            ((1, 2), 3) => Vertex(RecouplingLS((0, 2))),
+            (1, 2) => Vertex(RecouplingLS((0, 0))),
+        ),
+    )
+    named_dict, named_app = serializeToDict(named_chain; name = "named_test")
+    @test named_dict["propagators"][1]["parametrization"] == "lineshape_custom_res"
+    @test named_dict["propagators"][2]["parametrization"] == "constant_one"
+    @test haskey(named_app, "lineshape_custom_res")
+
+    # Test override via propagator_names keyword
+    override_dict, _ = serializeToDict(dk_chain; name = "override_test", propagator_names = ["constant_Dst", "lineshape_myres"])
+    @test override_dict["propagators"][1]["parametrization"] == "constant_Dst"
+    @test override_dict["propagators"][2]["parametrization"] == "lineshape_myres"
+
+
     mktempdir() do dir
         output_path = joinpath(dir, "model.json")
         returned_path = writeJson(output_path, document)

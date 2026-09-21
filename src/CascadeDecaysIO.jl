@@ -101,7 +101,8 @@ export appendFunction!,
     dict2instance,
     readJson,
     TFPWAMultichannelBreitWigner,
-    NRExpLineshape
+    NRExpLineshape,
+    NamedLineshape
 
 include("lineshapes.jl")
 include("writer.jl")

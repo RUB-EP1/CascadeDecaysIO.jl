@@ -42,3 +42,20 @@ end
 
 (ls::NRExpLineshape)(σ::Number) = -exp(-ls.αβ * (σ - ls.m0^2))
 (ls::NRExpLineshape)(σ::Real) = ls(σ + 1im * eps())
+
+"""
+    NamedLineshape
+
+Wrapper associating an explicit name with an underlying lineshape.
+When serialized by `CascadeDecaysIO`, the lineshape will use this name in
+the `parametrization` field of propagators and in the `functions` list.
+"""
+struct NamedLineshape{F} <: HadronicLineshapes.AbstractFlexFunc
+    name::String
+    lineshape::F
+end
+
+(nl::NamedLineshape)(args...) = nl.lineshape(args...)
+Base.getproperty(nl::NamedLineshape, s::Symbol) =
+    (s === :name || s === :lineshape) ? getfield(nl, s) : getproperty(getfield(nl, :lineshape), s)
+
