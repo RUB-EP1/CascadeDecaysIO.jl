@@ -1,10 +1,6 @@
 # CascadeDecaysIO.jl
 
-<<<<<<< HEAD
 `CascadeDecaysIO.jl` is the input/output and serialization package for [`CascadeDecays.jl`](https://github.com/RUB-EP1/CascadeDecays.jl). It converts multi-body hadronic cascade decay models between live Julia `CascadeDecay` objects and the framework-agnostic [**Amplitude Serialization Format**](https://github.com/RUB-EP1/amplitude-serialization) dictionaries and JSON files.
-=======
-`CascadeDecaysIO.jl` is the input/output and serialization package for [`CascadeDecays.jl`](https://github.com/RUB-EP1/CascadeDecays.jl). It converts multi-body hadronic cascade decay models between live Julia `CascadeDecay` objects and the framework-agnostic **Amplitude Serialization Format** (`HSF-aje-2025-02`) dictionaries and JSON files.
->>>>>>> 7e2544c628140697fa09b46cc89ff46ffd07f705
 
 Its goal is to allow amplitude analyses built in `CascadeDecays.jl` to be exported to a human-readable, self-contained JSON document—complete with topologies, spin couplings, lineshapes, form factors, and four-vector verification points—and to reconstruct and evaluate those models bit-exactly from the JSON file alone.
 

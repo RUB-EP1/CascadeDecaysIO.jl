@@ -1,10 +1,6 @@
 # Schema Notes
 
-<<<<<<< HEAD
 `CascadeDecaysIO.jl` follows the [Amplitude Serialization Format](https://github.com/RUB-EP1/amplitude-serialization) and `ThreeBodyDecaysIO.jl` document conventions, extending the topology representation to binary cascade trees with arbitrary numbers of final-state particles.
-=======
-`CascadeDecaysIO.jl` follows the ComPWA Amplitude Serialization Format (`HSF-aje-2025-02`) and `ThreeBodyDecaysIO.jl` document conventions, extending the topology representation to binary cascade trees with arbitrary numbers of final-state particles.
->>>>>>> 7e2544c628140697fa09b46cc89ff46ffd07f705
 
 ## Document Sections
 

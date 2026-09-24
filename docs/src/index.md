@@ -1,10 +1,6 @@
 # CascadeDecaysIO.jl
 
-<<<<<<< HEAD
 `CascadeDecaysIO.jl` serializes and deserializes `CascadeDecays.jl` models to and from [amplitude-serialization](https://github.com/RUB-EP1/amplitude-serialization) dictionaries and JSON files.
-=======
-`CascadeDecaysIO.jl` serializes and deserializes `CascadeDecays.jl` models to and from amplitude-serialization dictionaries and JSON files (`HSF-aje-2025-02`).
->>>>>>> 7e2544c628140697fa09b46cc89ff46ffd07f705
 
 It supports full write-and-read round-trip workflows: exporting mass-free kinematics, multi-topology decay chains, propagators, vertices, standard and custom lineshapes, and four-vector verification points, and reconstructing live `CascadeDecay` objects via `readJson`.
 
