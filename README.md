@@ -1,39 +1,27 @@
 # CascadeDecaysIO.jl
 
-`CascadeDecaysIO.jl` is the input/output and serialization package for [`CascadeDecays.jl`](https://github.com/RUB-EP1/CascadeDecays.jl). It converts multi-body hadronic cascade decay models between live Julia `CascadeDecay` objects and the framework-agnostic [**Amplitude Serialization Format**](https://github.com/RUB-EP1/amplitude-serialization) dictionaries and JSON files.
-
-Its goal is to allow amplitude analyses built in `CascadeDecays.jl` to be exported to a human-readable, self-contained JSON document—complete with topologies, spin couplings, lineshapes, form factors, and four-vector verification points—and to reconstruct and evaluate those models bit-exactly from the JSON file alone.
+`CascadeDecaysIO.jl` is the serialization and deserialization package for [`CascadeDecays.jl`](https://github.com/RUB-EP1/CascadeDecays.jl). It converts multi-body cascade amplitude models between live Julia objects (`CascadeDecay`, `DecayChain`, `SystemSpins`) and the framework-agnostic [**Amplitude Serialization Format**](https://github.com/RUB-EP1/amplitude-serialization) dictionaries and JSON files.
 
 ---
 
 ## Core Functionality
 
-1. **Model Serialization (Writer)**
-   - Serializes a `CascadeDecay` model directly (`amplitudeSerializationDict(model; ...)`, `serializeToDict(model; ...)`, `writeJson(path, model; ...)`), or a `CascadeSystem` / `SystemSpins` paired with weighted `DecayChain`s.
-   - Emits `kinematics` (`initial_state` and `final_state` with `name`, `index`, and `spin`), omitting hardcoded `mass` fields by default so event-dependent masses are determined by four-vectors.
-   - Collects all referenced propagators and vertex form factors into the top-level `"functions"` array.
-
-2. **Model Deserialization (Reader & Round-Trip Execution)**
-   - Reads an amplitude-serialization JSON file via `readJson(path)` (or a parsed dictionary via `dict2instance(CascadeDecay, dict)`), returning `(model::CascadeDecay, system::CascadeSystem, document::LittleDict)`.
-   - Reconstructs all topologies, LS/helicity/parity vertices, form factors, and standard or custom lineshapes so the computation can be restarted strictly from the JSON file.
-   - Supports passing `custom_functions = Dict("name" => fn)` to bind custom callable functions during deserialization.
-
-3. **Clean, Hash-Free Function Naming (`NamedLineshape`)**
-   - Wrapping any lineshape in `NamedLineshape("lineshape_ResA", ls)` (or passing `propagator_names`) ensures that `"parametrization"` references in `"chains"` and definitions in `"functions"` use exact, human-readable names without structural hashes.
-   - Form factors automatically receive clean deterministic names such as `BlattWeisskopf_L1_d3.0`.
-
-4. **Standard & Custom Physics Lineshapes**
-   - **Standard types**: `BreitWigner`, `MultichannelBreitWigner` (including multi-wave partial widths in a single decay channel), `ConstantLineshape`, `BlattWeisskopf`, `MomentumPower`, and `NoFormFactor`.
-   - **Custom types (`"type": "custom"`)**: `NRExpLineshape` (non-resonant exponential), `TFPWAMultichannelBreitWigner` (TF-PWA running-width convention), and general custom expression containers.
-
-5. **Validation & Four-Vector Verification Points**
-   - Provides mutating helpers (`setValidation!`, `setParameterPoints!`, `setDomains!`, `setVariables!`, `setMisc!`, `appendFunction!`, `setSection!`) to attach phase-space domains, sampled four-vectors (`parameter_points`), and expected intensity/amplitude checksums (`misc.amplitude_model_checksums`).
+- **Writer API (`serializeToDict`, `amplitudeSerializationDict`, `writeJson`)**:
+  Exports any `CascadeDecay` model (or a spin system plus weighted chains) into an amplitude-serialization dictionary or formatted JSON file.
+- **Reader API (`readJson`, `dict2instance`)**:
+  Reconstructs a live `CascadeDecay` model, `CascadeSystem`, and `SystemSpins` directly from a JSON file or parsed dictionary so amplitude evaluations can be restarted from the JSON alone.
+- **Clean Function Naming (`NamedLineshape`, `propagator_names`)**:
+  Lets you assign human-readable names to lineshapes in `"parametrization"` and `"functions"` without structural hashes.
+- **Document Modifiers (`setVariables!`, `setDomains!`, `setValidation!`, `setParameterPoints!`, `setMisc!`, `appendFunction!`, `setSection!`)**:
+  Mutating helpers for attaching metadata, phase-space domains, and verification points (`four_vectors` and `amplitude_model_checksums`).
+- **Custom Lineshape Support (`custom_functions`)**:
+  Serializes custom lineshapes under `"type": "custom"` and allows binding arbitrary Julia callables by name during deserialization.
 
 ---
 
-## Setup & Running Tests
+## Installation & Setup
 
-With `CascadeDecays.jl` and `CascadeDecaysIO.jl` cloned in the same workspace, activate and test `CascadeDecaysIO.jl`:
+With `CascadeDecays.jl` and `CascadeDecaysIO.jl` cloned in the same workspace:
 
 ```julia
 using Pkg
@@ -42,229 +30,222 @@ Pkg.instantiate()
 Pkg.test()
 ```
 
-To run the complete standalone dummy analysis and JSON round-trip example from the terminal:
-
-```powershell
-julia --project=CascadeDecaysIO.jl CascadeDecaysIO.jl/examples/dummy_analysis.jl
-```
-
 ---
 
-## Step-by-Step Tutorial: Building, Writing, and Reading a Cascade Model
+## Tutorial: How to Set Up the JSON Writer and Reader
 
-For a complete multi-topology script (`(((1, 2), 3), 4)` and `((1, 2), (3, 4))`) with multiple partial waves and 3 four-vector verification events, see [`examples/dummy_analysis.jl`](examples/dummy_analysis.jl). Below is a complete walkthrough of the package workflow.
+### Part 1: Setting Up the JSON Writer
 
-### Step 1: Define External Spins, Topology, and Named Lineshapes
+#### 1. Naming Lineshapes (`NamedLineshape` or `propagator_names`)
 
-Spin arguments in `SystemSpins`, `Propagator`, and `RecouplingLS` use doubled integer units (`2J`, `2L`, `2S`) internally, which `CascadeDecaysIO.jl` automatically converts to standard angular-momentum units (`J`, `L`, `S`) in the JSON.
+When `CascadeDecaysIO` serializes a `DecayChain`, every propagator's lineshape and vertex form factor is placed in the top-level `"functions"` list and referenced by name in the chain.
+
+You can control propagator function names in two ways:
+- **Option A — Wrap lineshapes in `NamedLineshape` when building your chains**:
+  ```julia
+  using CascadeDecays, CascadeDecaysIO, HadronicLineshapes
+
+  my_bw = NamedLineshape("lineshape_resonance_1", BreitWigner(m0, width, ma, mb, l, d))
+  ```
+- **Option B — Pass `propagator_names` during serialization** (without modifying existing chains):
+  ```julia
+  # Pass a vector of names per propagator in the chain, or a Dict mapping topology nodes to names:
+  propagator_names = Dict((1, 2) => "lineshape_sub", ((1, 2), 3) => "lineshape_main")
+  ```
+*(Vertex form factors such as `BlattWeisskopf{L}(R)` and `MomentumPower{L}()` are named automatically as `BlattWeisskopf_L<L>_d<R>` and `MomentumPower_l<L>`.)*
+
+#### 2. Building the Serialization Dictionary (`amplitudeSerializationDict` & `serializeToDict`)
+
+If you have a `CascadeDecay` object `model` (or a `SystemSpins` / `CascadeSystem` and a list of `"chain_name" => (weight, chain)` pairs):
+
+- **Full JSON document (`amplitudeSerializationDict`)**:
+  Builds the complete top-level dictionary (`"distributions"`, `"functions"`, and any optional sections):
+  ```julia
+  document = amplitudeSerializationDict(
+      model;
+      name               = "my_distribution_name",
+      particle_labels    = ("p1", "p2", "p3", "p4", "P0"), # finals..., initial
+      variables          = ["m1_2sq", "m1_2_3sq"],
+      propagator_names   = nothing,                        # optional override
+      reference_topology = nothing,                        # defaults to model.reference_topology
+  )
+  ```
+  *(You can also call `amplitudeSerializationDict(system_or_spins, weighted_chains; ...)`.)*
+
+- **Low-level decay description & appendix (`serializeToDict`)**:
+  If you only need the inner `decay_description` dictionary and the `appendix` of collected functions:
+  ```julia
+  decay_description, appendix = serializeToDict(
+      model;
+      particle_labels = ("p1", "p2", "p3", "p4", "P0"),
+  )
+  ```
+
+#### 3. Adding Domains, Metadata, and Verification Points (`set...` Helpers)
+
+You can pass optional sections directly as keyword arguments to `amplitudeSerializationDict`, or attach/update them on `document` using mutating setter functions:
 
 ```julia
-using CascadeDecays
-using CascadeDecays.ThreeBodyDecays: RecouplingLS
-using CascadeDecaysIO
-using FourVectors
-using HadronicLineshapes
+# Set kinematic variable names on distributions[1]
+setVariables!(document, ["m1_2sq", "m1_2_3sq"])
 
-# External spins for P0(J=0) -> p1(0) p2(0) p3(0) p4(0)
-spins    = SystemSpins(0, 0, 0, 0; two_h0 = 0)
-topology = DecayTopology((((1, 2), 3), 4))
-
-# NamedLineshape assigns clean, hash-free names in the JSON "parametrization" and "functions" sections
-ls_v12  = NamedLineshape("constant_V12", ConstantLineshape(1.0 + 0.0im))
-ls_resA = NamedLineshape(
-    "lineshape_ResA",
-    MultichannelBreitWigner(
-        3.50,
-        [
-            (; gsq = 0.45, ma = 1.80, mb = 1.50, l = 0, d = 3.0),
-            (; gsq = 0.20, ma = 1.80, mb = 1.50, l = 2, d = 3.0),
+# Define phase-space domains
+setDomains!(document, [
+    Dict(
+        "name" => "phase_space",
+        "type" => "product_domain",
+        "axes" => [
+            Dict("name" => "m1_2sq",   "min" => 0.5, "max" => 9.0),
+            Dict("name" => "m1_2_3sq", "min" => 2.0, "max" => 20.0),
         ],
     ),
-)
-```
+])
 
-### Step 2: Build a `DecayChain` and `CascadeDecay` Model
+# Attach free-form metadata
+setMisc!(document, Dict("description" => "Example cascade model", "generator" => "CascadeDecaysIO.jl"))
 
-```julia
-chain = DecayChain(
-    topology,
-    spins;
-    propagators = (
-        (1, 2)      => Propagator(2, ls_v12),  # J = 1 intermediate state on (1, 2)
-        ((1, 2), 3) => Propagator(2, ls_resA), # J = 1 resonance on ((1, 2), 3)
-    ),
-    vertices = (
-        (((1, 2), 3), 4) => Vertex(RecouplingLS((2, 2)), BlattWeisskopf{1}(3.0)), # L=1, S=1
-        ((1, 2), 3)      => Vertex(RecouplingLS((0, 2)), BlattWeisskopf{0}(3.0)), # L=0, S=1
-        (1, 2)           => Vertex(RecouplingLS((2, 0))),                         # L=1, S=0
-    ),
-)
-
-model = CascadeDecay(
-    (chain,),
-    topology;
-    couplings = (0.85 - 0.15im,),
-    names     = ("ResA_L1_d0",),
-)
-```
-
-### Step 3: Evaluate on a Four-Vector Event & Build the Serialization Document
-
-```julia
-# Evaluate complex amplitude A and unpolarized intensity |A|^2 on a 4-vector point
-task = KinematicTask((topology,))
-ev   = (
-    p1 = FourVector( 0.42, -0.31,  0.18; E = 1.52),
-    p2 = FourVector(-0.08,  0.14, -0.05; E = 0.35),
-    p3 = FourVector(-0.55,  0.29, -0.41; E = 1.65),
-    p4 = FourVector( 0.21, -0.12,  0.28; E = 0.68),
-)
-pt  = KinematicPoint(task, (ev.p1, ev.p2, ev.p3, ev.p4))
-amp = only(amplitude(model, pt))
-val = abs2(amp) # unpolarized intensity |A|^2
-
-# Build the JSON-ready dictionary
-document = amplitudeSerializationDict(
-    model;
-    particle_labels  = ("p1", "p2", "p3", "p4", "P0"),
-    name             = "minimal_cascade_model",
-    variables        = ["m1_2sq", "m1_2_3sq"],
-    parameter_points = [
+# Attach verification parameter points (e.g. sampled four-vectors) and reference checksums
+setValidation!(document, Dict(
+    "parameter_points" => [
         Dict(
-            "name" => "verification_point_1",
+            "name" => "point_1",
             "four_vectors" => Dict(
-                "p1" => Dict("E" => ev.p1.E, "px" => ev.p1.px, "py" => ev.p1.py, "pz" => ev.p1.pz),
-                "p2" => Dict("E" => ev.p2.E, "px" => ev.p2.px, "py" => ev.p2.py, "pz" => ev.p2.pz),
-                "p3" => Dict("E" => ev.p3.E, "px" => ev.p3.px, "py" => ev.p3.py, "pz" => ev.p3.pz),
-                "p4" => Dict("E" => ev.p4.E, "px" => ev.p4.px, "py" => ev.p4.py, "pz" => ev.p4.pz),
+                "p1" => Dict("E" => E1, "px" => px1, "py" => py1, "pz" => pz1),
+                "p2" => Dict("E" => E2, "px" => px2, "py" => py2, "pz" => pz2),
+                "p3" => Dict("E" => E3, "px" => px3, "py" => py3, "pz" => pz3),
+                "p4" => Dict("E" => E4, "px" => px4, "py" => py4, "pz" => pz4),
             ),
         ),
     ],
-    misc = Dict(
-        "generator" => "CascadeDecaysIO.jl",
+    "misc" => Dict(
         "amplitude_model_checksums" => [
             Dict(
-                "distribution"   => "minimal_cascade_model",
-                "point"          => "verification_point_1",
-                "value"          => val,
+                "distribution"   => "my_distribution_name",
+                "point"          => "point_1",
+                "value"          => abs2(amp), # unpolarized intensity |A|^2
                 "amplitude_real" => real(amp),
                 "amplitude_imag" => imag(amp),
             ),
         ],
     ),
-)
+))
 
-# Write formatted JSON to disk
-writeJson("minimal_cascade_model.json", document)
+# Append an extra function definition or custom top-level section if needed
+appendFunction!(document, "extra_fn", Dict("type" => "ConstantLineshape", "value" => "1.0 + 0.0i"))
+setSection!(document, "custom_section", Dict("version" => 1))
 ```
 
-### Step 4: Read the JSON File and Restart the Calculation
+#### 4. Writing to Disk (`writeJson`)
 
-Using `readJson`, the entire `CascadeDecay` model is reconstructed strictly from the JSON file:
+Write an already built `document` dictionary, or serialize and write a `CascadeDecay` model in a single step:
 
 ```julia
-reloaded_model, reloaded_system, reloaded_doc = readJson("minimal_cascade_model.json")
+# From an existing document dictionary:
+writeJson("model.json", document; indent = 4)
 
-# Re-evaluate at the verification point stored in the JSON
-fv = reloaded_doc["parameter_points"][1]["four_vectors"]
-q1 = FourVector(fv["p1"]["px"], fv["p1"]["py"], fv["p1"]["pz"]; E = fv["p1"]["E"])
-q2 = FourVector(fv["p2"]["px"], fv["p2"]["py"], fv["p2"]["pz"]; E = fv["p2"]["E"])
-q3 = FourVector(fv["p3"]["px"], fv["p3"]["py"], fv["p3"]["pz"]; E = fv["p3"]["E"])
-q4 = FourVector(fv["p4"]["px"], fv["p4"]["py"], fv["p4"]["pz"]; E = fv["p4"]["E"])
-
-reloaded_topologies = Tuple(unique(ch.topology for ch in reloaded_model.chains))
-reloaded_pt         = KinematicPoint(KinematicTask(reloaded_topologies), (q1, q2, q3, q4))
-reloaded_amp        = only(amplitude(reloaded_model, reloaded_pt))
-
-@assert reloaded_amp == amp
+# Or directly from a CascadeDecay model (accepts all amplitudeSerializationDict keyword arguments):
+writeJson(
+    "model.json",
+    model;
+    name            = "my_distribution_name",
+    particle_labels = ("p1", "p2", "p3", "p4", "P0"),
+)
 ```
 
 ---
 
-## JSON Document Structure
+### Part 2: Setting Up the JSON Reader
 
-A serialized document built with `amplitudeSerializationDict` contains:
+#### 1. Reading a JSON File (`readJson`)
 
-```json
-{
-  "distributions": [
-    {
-      "type": "HadronicUnpolarizedIntensity",
-      "name": "minimal_cascade_model",
-      "variables": ["m1_2sq", "m1_2_3sq"],
-      "decay_description": {
-        "kinematics": {
-          "initial_state": {"name": "P0", "index": 0, "spin": 0},
-          "final_state": [
-            {"name": "p1", "index": 1, "spin": 0},
-            {"name": "p2", "index": 2, "spin": 0},
-            {"name": "p3", "index": 3, "spin": 0},
-            {"name": "p4", "index": 4, "spin": 0}
-          ]
-        },
-        "reference_topology": [[[1, 2], 3], 4],
-        "chains": [
-          {
-            "name": "ResA_L1_d0",
-            "weight": "0.85 - 0.15i",
-            "topology": [[[1, 2], 3], 4],
-            "propagators": [
-              {"node": [1, 2], "spin": 1, "parametrization": "constant_V12"},
-              {"node": [[1, 2], 3], "spin": 1, "parametrization": "lineshape_ResA"}
-            ],
-            "vertices": [
-              {"node": [[[1, 2], 3], 4], "type": "ls", "l": 1, "s": 1, "formfactor": "BlattWeisskopf_L1_d3.0"},
-              {"node": [[1, 2], 3], "type": "ls", "l": 0, "s": 1, "formfactor": "BlattWeisskopf_L0_d3.0"},
-              {"node": [1, 2], "type": "ls", "l": 1, "s": 0, "formfactor": ""}
-            ]
-          }
-        ]
-      }
-    }
-  ],
-  "functions": [
-    {
-      "type": "BlattWeisskopf",
-      "l": 1,
-      "radius": 3.0,
-      "name": "BlattWeisskopf_L1_d3.0"
-    },
-    {
-      "type": "ConstantLineshape",
-      "value": "1.0 + 0.0i",
-      "name": "constant_V12"
-    }
-  ],
-  "parameter_points": [],
-  "misc": {
-    "amplitude_model_checksums": []
-  }
-}
-```
-
-### Mutating Document Setters
-
-Optional sections can be added or updated on an existing document dictionary at any time:
+`readJson` parses a JSON file and reconstructs the runnable `CascadeDecay` model, the `CascadeSystem`, and the raw parsed dictionary:
 
 ```julia
-setVariables!(document, ["m1_2sq", "m1_2_3sq"])
-setDomains!(document, ["phase_space"])
-setParameterPoints!(document, parameter_points)
-setMisc!(document, Dict("analysis" => "B2DxDK"))
-setValidation!(
-    document,
-    Dict(
-        "misc" => Dict("amplitude_model_checksums" => checksums),
-        "parameter_points" => parameter_points,
+model, system, document = readJson("model.json")
+```
+
+- `model::CascadeDecay`: Ready to evaluate on any `KinematicPoint` via `amplitude(model, point)` or `unpolarized_intensity(model, point)`.
+- `system::CascadeSystem`: Contains the external `SystemSpins` (`system.quantum`) and `SystemMasses` (`system.masses`; defaults to `0.0` when masses are omitted from `kinematics`).
+- `document::LittleDict{String,Any}`: The parsed JSON dictionary (allowing access to `document["parameter_points"]`, `document["misc"]`, etc.).
+
+#### 2. Deserializing from an Existing Dictionary (`dict2instance`)
+
+If you already have a parsed JSON dictionary in memory, use `dict2instance` to reconstruct specific types:
+
+```julia
+model  = dict2instance(CascadeDecay, document)
+system = dict2instance(CascadeSystem, document)
+spins  = dict2instance(SystemSpins, document)
+```
+
+#### 3. Providing Custom Lineshape Functions (`custom_functions`)
+
+When a JSON file contains `"type": "custom"` functions that are not built-in types, pass a `custom_functions` dictionary mapping the JSON function `"name"` to any callable Julia object `f(σ)`:
+
+```julia
+my_custom_lineshapes = Dict{String,Any}(
+    "my_custom_propagator" => (σ -> 1.0 / (3.5^2 - σ - 0.2im)),
+)
+
+model, system, document = readJson("model.json"; custom_functions = my_custom_lineshapes)
+# or:
+model = dict2instance(CascadeDecay, document; custom_functions = my_custom_lineshapes)
+```
+
+---
+
+## Minimal Copy-Paste Template (Writer & Reader)
+
+For a fuller multi-topology example with four-vector verification points, run [`examples/dummy_analysis.jl`](examples/dummy_analysis.jl):
+
+```powershell
+julia --project=CascadeDecaysIO.jl CascadeDecaysIO.jl/examples/dummy_analysis.jl
+```
+
+Below is a minimal self-contained template showing both writing and reading:
+
+```julia
+using CascadeDecays
+using CascadeDecays.ThreeBodyDecays: RecouplingLS
+using CascadeDecaysIO
+using HadronicLineshapes
+
+# 1. Build a minimal CascadeDecay model
+spins    = SystemSpins(0, 0, 0, 0; two_h0 = 0)
+topology = DecayTopology((((1, 2), 3), 4))
+
+chain = DecayChain(
+    topology,
+    spins;
+    propagators = (
+        (1, 2)      => Propagator(2, NamedLineshape("const_12", ConstantLineshape(1.0 + 0.0im))),
+        ((1, 2), 3) => Propagator(2, NamedLineshape("bw_123",   BreitWigner(3.5, 0.1, 1.8, 1.5, 1, 3.0))),
+    ),
+    vertices = (
+        (((1, 2), 3), 4) => Vertex(RecouplingLS((2, 2)), BlattWeisskopf{1}(3.0)),
+        ((1, 2), 3)      => Vertex(RecouplingLS((0, 2)), BlattWeisskopf{0}(3.0)),
+        (1, 2)           => Vertex(RecouplingLS((2, 0))),
     ),
 )
-appendFunction!(document, "constant_one", Dict("type" => "ConstantLineshape", "value" => 1.0))
-setSection!(document, "custom_section", Dict("kept" => true))
+
+model = CascadeDecay((chain,), topology; couplings = (1.0 + 0.0im,), names = ("chain_1",))
+
+# 2. Write to JSON
+writeJson(
+    "example_model.json",
+    model;
+    name            = "example_intensity",
+    particle_labels = ("p1", "p2", "p3", "p4", "P0"),
+    variables       = ["m1_2sq", "m1_2_3sq"],
+)
+
+# 3. Read back from JSON
+reloaded_model, reloaded_system, reloaded_doc = readJson("example_model.json")
 ```
 
 ---
 
-## Supported Types & Functions
+## Supported Types & JSON Mapping
 
 | Julia Object / Function | Emitted JSON Representation | Reader / Round-Trip Support |
 | --- | --- | --- |
@@ -282,14 +263,3 @@ setSection!(document, "custom_section", Dict("kept" => true))
 | `RecouplingLS((2L, 2S))` | Vertex with `"type": "ls"`, `"l": L`, `"s": S` | `ThreeBodyDecays.RecouplingLS` |
 | `NoRecoupling(2λa, 2λb)` | Vertex with `"type": "helicity"` | `ThreeBodyDecays.NoRecoupling` |
 | `ParityRecoupling(2λa, 2λb, ±)` | Vertex with `"type": "parity"` | `ThreeBodyDecays.ParityRecoupling` |
-
----
-
-## Building Documentation
-
-The documentation site uses Quarto for the workflow tutorial (`docs/writer_workflow.qmd`) and `Documenter.jl` for the HTML site:
-
-```powershell
-julia --project=docs -e "using Pkg; Pkg.instantiate()"
-julia --project=docs docs/make.jl
-```
