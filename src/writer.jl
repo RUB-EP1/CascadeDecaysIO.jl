@@ -25,7 +25,25 @@ function _normalize_json_value(value)
     end
 end
 
-_node_label(address) = address isa Tuple ? join(_node_label.(address), "_") : string(address)
+function _write_node_label!(io::IOBuffer, address)
+    if address isa Tuple
+        n = length(address)
+        @inbounds for i in 1:n
+            i > 1 && write(io, '_')
+            _write_node_label!(io, address[i])
+        end
+    else
+        print(io, address)
+    end
+end
+
+function _node_label(address)
+    address isa Integer && return string(address)
+    io = IOBuffer(sizehint = 16)
+    _write_node_label!(io, address)
+    return String(take!(io))
+end
+
 _mass_variable(address) = "m$(_node_label(address))sq"
 
 function _line_address(topology::DecayTopology, line_ind::Integer)
@@ -283,10 +301,11 @@ function _serialize_lineshape(lineshape, variable_name)
         ),
         _Appendix()
     end
-    _serialize_lineshape(lineshape::NamedLineshape, variable_name) =
-        _serialize_lineshape(lineshape.lineshape, variable_name)
     throw(ArgumentError("unsupported lineshape type $(typeof(lineshape)) for variable $variable_name"))
 end
+
+_serialize_lineshape(lineshape::NamedLineshape, variable_name) =
+    _serialize_lineshape(lineshape.lineshape, variable_name)
 
 _lineshape_name(lineshape::NamedLineshape, address) = lineshape.name
 
@@ -394,11 +413,18 @@ function serializeToDict(
     propagator_names = nothing,
 )
     appendix = _Appendix()
-    functions = LittleDict{String,Any}()
     topology = chain.topology
 
-    p_lines = collect(zip(chain.propagators, propagator_two_js(chain), propagating_line_inds(chain)))
-    propagator_entries = map(enumerate(p_lines)) do (i, (lineshape, two_j, line_ind))
+    props = chain.propagators
+    two_js = propagator_two_js(chain)
+    line_inds = propagating_line_inds(chain)
+    n_props = length(props)
+    propagator_entries = Vector{LittleDict{String,Any}}(undef, n_props)
+
+    @inbounds for i in 1:n_props
+        lineshape = props[i]
+        two_j = two_js[i]
+        line_ind = line_inds[i]
         p_name = if !isnothing(propagator_names)
             if propagator_names isa AbstractVector || propagator_names isa Tuple
                 (1 <= i <= length(propagator_names)) ? propagator_names[i] : nothing
@@ -412,21 +438,22 @@ function serializeToDict(
             nothing
         end
         prop_dict, fn_pair, fn_appendix = _serialize_propagator(topology, lineshape, two_j, line_ind; name = p_name)
-        functions[fn_pair.first] = fn_pair.second
         _merge_appendix!(appendix, fn_appendix)
-        prop_dict
+        appendix[fn_pair.first] = fn_pair.second
+        propagator_entries[i] = prop_dict
     end
 
-    vertex_entries = map(1:nvertices(chain)) do vertex_ind
+    n_verts = nvertices(chain)
+    vertex_entries = Vector{LittleDict{String,Any}}(undef, n_verts)
+    @inbounds for vertex_ind in 1:n_verts
         vertex_dict, vertex_appendix = _serialize_vertex(topology, chain.vertices[vertex_ind], vertex_ind)
         _merge_appendix!(appendix, vertex_appendix)
-        vertex_dict
+        vertex_entries[vertex_ind] = vertex_dict
     end
 
-    merge!(appendix, functions)
     chain_dict = LittleDict{String,Any}(
-        "vertices" => collect(vertex_entries),
-        "propagators" => collect(propagator_entries),
+        "vertices" => vertex_entries,
+        "propagators" => propagator_entries,
         "topology" => _json_topology(topology),
         "name" => name,
     )
@@ -459,11 +486,6 @@ The `decay_description` contains `"kinematics"`, `"reference_topology"`, and
   label.
 - `reference_topology`: optional topology override. This may be a
   `DecayTopology` or a nested tuple/array node such as `(((1, 2), 3), 4)`.
-
-# Limitations
-
-This method writes dictionaries only. It does not write JSON files and it does
-not provide read-back support.
 """
 function serializeToDict(
     spins::Union{SystemSpins, SystemSpinParities},
@@ -505,6 +527,20 @@ end
 serializeToDict(system::CascadeSystem, weighted_chains; kwargs...) =
     serializeToDict(system.quantum, weighted_chains; kwargs...)
 
+function _cascade_spins_and_chains(cascade::CascadeDecay)
+    first_chain = first(cascade.chains)
+    finals_idx = final_line_inds(first_chain)
+    spins = SystemSpins(
+        ntuple(i -> first_chain.line_two_js[finals_idx[i]], length(finals_idx))...;
+        two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
+    )
+    weighted_chains = [
+        cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
+        for i in eachindex(cascade.chains)
+    ]
+    return spins, weighted_chains
+end
+
 """
     serializeToDict(cascade::CascadeDecay; particle_labels=nothing, reference_topology=nothing, propagator_names=nothing)
 
@@ -517,15 +553,7 @@ function serializeToDict(
     reference_topology = nothing,
     propagator_names = nothing,
 )
-    first_chain = first(cascade.chains)
-    spins = SystemSpins(
-        first_chain.line_two_js[final_line_inds(first_chain)]...;
-        two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
-    )
-    weighted_chains = [
-        cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
-        for i in eachindex(cascade.chains)
-    ]
+    spins, weighted_chains = _cascade_spins_and_chains(cascade)
     ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
     return serializeToDict(spins, weighted_chains; particle_labels, reference_topology = ref_top, propagator_names)
 end
@@ -852,15 +880,7 @@ function amplitudeSerializationDict(
     reference_topology = nothing,
     kwargs...,
 )
-    first_chain = first(cascade.chains)
-    spins = SystemSpins(
-        first_chain.line_two_js[final_line_inds(first_chain)]...;
-        two_h0 = first_chain.line_two_js[root_line_ind(first_chain)],
-    )
-    weighted_chains = [
-        cascade.names[i] => (cascade.couplings[i], cascade.chains[i])
-        for i in eachindex(cascade.chains)
-    ]
+    spins, weighted_chains = _cascade_spins_and_chains(cascade)
     ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
     return amplitudeSerializationDict(
         spins,

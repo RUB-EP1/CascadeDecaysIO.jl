@@ -7,6 +7,7 @@ HadronicLineshapes = "49c9d978-1f9d-4e96-a984-0a9783c0b9bf"
 InstructionalDecayTrees = "1d606af4-d0f8-4ff7-bc8d-eb3f657b7647"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]

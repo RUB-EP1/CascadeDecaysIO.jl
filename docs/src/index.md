@@ -1,33 +1,19 @@
 # CascadeDecaysIO.jl
 
-`CascadeDecaysIO.jl` writes `CascadeDecays.jl` cascade models to
-amplitude-serialization-style dictionaries and JSON files.
+`CascadeDecaysIO.jl` serializes and deserializes `CascadeDecays.jl` models to and from [amplitude-serialization](https://github.com/RUB-EP1/amplitude-serialization) dictionaries and JSON files.
 
-The package is currently writer-first. It serializes kinematics, cascade
-topologies, propagators, vertices, referenced functions, and the standard
-top-level document sections used by amplitude-serialization files. Reader and
-round-trip support are planned but not implemented yet.
+It supports full write-and-read round-trip workflows: exporting mass-free kinematics, multi-topology decay chains, propagators, vertices, standard and custom lineshapes, and four-vector verification points, and reconstructing live `CascadeDecay` objects via `readJson`.
 
 ## What It Provides
 
-- `serializeToDict` for low-level schema fragments and decay descriptions.
-- `amplitudeSerializationDict` for complete JSON-ready documents.
-- Section setters such as `setDomains!`, `setVariables!`, `setValidation!`,
-  and `setParameterPoints!`.
-- `writeJson` for formatted JSON output.
-- Schema fragments compatible with the `ThreeBodyDecaysIO.jl` naming style,
-  generalized to multi-step cascade topologies.
+- `serializeToDict` and `amplitudeSerializationDict` for serializing `CascadeDecay` models or `(system, weighted_chains)` collections.
+- `NamedLineshape` and `propagator_names` for clean, hash-free function naming in `"parametrization"` and `"functions"`.
+- Section setters (`setDomains!`, `setVariables!`, `setValidation!`, `setParameterPoints!`, `setMisc!`, `appendFunction!`, `setSection!`).
+- `writeJson` for formatted JSON export.
+- `readJson` and `dict2instance` for reconstructing `CascadeDecay`, `CascadeSystem`, and `SystemSpins` from JSON files or dictionaries.
 
 ## Documentation Map
 
-- [Writer workflow](@ref) shows the recommended path from a
-  `CascadeDecays.jl` model to a JSON file.
-- [Schema notes](@ref) explains how CD-IO maps cascade objects into the
-  amplitude-serialization document layout.
-- [API reference](@ref) lists public functions and docstrings.
-
-## Status
-
-This package is experimental. The writer is useful for producing structured
-model descriptions, but downstream readers for four-body cascade models are
-still under development.
+- [Serialization & Round-Trip Workflow](@ref) shows the recommended path from a `CascadeDecays.jl` model to a JSON file and back.
+- [Schema Notes](@ref) explains how `CascadeDecaysIO.jl` maps cascade objects into the amplitude-serialization document layout.
+- [API Reference](@ref) lists public types, functions, and docstrings.
