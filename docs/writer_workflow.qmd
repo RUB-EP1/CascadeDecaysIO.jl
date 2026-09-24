@@ -1,101 +1,81 @@
 ---
-title: "Writer Workflow"
+title: "Serialization & Round-Trip Workflow"
 execute:
   eval: false
 ---
 
-# Writer Workflow
+# Serialization & Round-Trip Workflow
 
-This page shows the intended writer-first workflow:
+This tutorial walks through the complete `CascadeDecaysIO.jl` workflow:
 
-1. Build a cascade model with `CascadeDecays.jl`.
-2. Serialize the model to an amplitude-serialization-style document.
-3. Add optional metadata, domains, parameter points, or validation checks.
-4. Write the result as formatted JSON.
-
-The example is deliberately small. Its purpose is to show the data flow, not to
-represent a physical analysis.
+1. Build a multi-body cascade model with `CascadeDecays.jl` and `NamedLineshape`.
+2. Serialize the model to an amplitude-serialization document (`amplitudeSerializationDict`).
+3. Add optional metadata, phase-space domains, and four-vector verification points.
+4. Write the document as formatted JSON (`writeJson`).
+5. Reload the model strictly from the JSON file (`readJson`) and re-evaluate amplitudes.
 
 ```julia
 using CascadeDecays
+using CascadeDecays.ThreeBodyDecays: RecouplingLS
 using CascadeDecaysIO
+using FourVectors
 using HadronicLineshapes
-using ThreeBodyDecays: RecouplingLS
 ```
 
-## Build a Cascade Model
+## 1. Build a Cascade Model
 
-The `CascadeSystem` stores external masses and spins. The `DecayTopology`
-stores the binary cascade topology. The `DecayChain` attaches propagators and
-vertices to that topology.
+`SystemSpins` defines the external particle spins (`2J`). `DecayTopology` stores the binary cascade tree, and `DecayChain` attaches propagators and vertices to that topology. Wrapping lineshapes in `NamedLineshape` assigns clean, human-readable names in the JSON `"parametrization"` and `"functions"` sections.
 
 ```julia
-system = CascadeSystem(
-    SystemSpins(0, 0, 0, 0; two_h0 = 0),
-    SystemMasses(1.0, 1.1, 1.2, 1.3; m0 = 5.0),
-)
-
+spins    = SystemSpins(0, 0, 0, 0; two_h0 = 0)
 topology = DecayTopology((((1, 2), 3), 4))
 
+ls_v12  = NamedLineshape("constant_V12", ConstantLineshape(1.0 + 0.0im))
+ls_resA = NamedLineshape(
+    "lineshape_ResA",
+    BreitWigner(3.50, 0.08, 1.80, 1.50, 1, 3.0),
+)
+
 chain = DecayChain(
-    topology;
+    topology,
+    spins;
     propagators = (
-        ((1, 2), 3) => Propagator(2, BreitWigner(2.4, 0.1)),
-        (1, 2) => Propagator(0, ConstantLineshape(1.0 + 0.0im)),
+        (1, 2)      => Propagator(2, ls_v12),
+        ((1, 2), 3) => Propagator(2, ls_resA),
     ),
     vertices = (
-        (((1, 2), 3), 4) => Vertex(RecouplingLS((0, 2))),
-        ((1, 2), 3) => Vertex(RecouplingLS((0, 2))),
-        (1, 2) => Vertex(RecouplingLS((0, 0))),
+        (((1, 2), 3), 4) => Vertex(RecouplingLS((2, 2)), BlattWeisskopf{1}(3.0)),
+        ((1, 2), 3)      => Vertex(RecouplingLS((0, 2)), BlattWeisskopf{0}(3.0)),
+        (1, 2)           => Vertex(RecouplingLS((2, 0))),
     ),
+)
+
+model = CascadeDecay(
+    (chain,),
+    topology;
+    couplings = (0.85 - 0.15im,),
+    names     = ("ResA_L1_d0",),
 )
 ```
 
-The nested topology `(((1, 2), 3), 4)` is emitted as `[[[1, 2], 3], 4]`.
-Leaves are final-state particle indices; nested arrays describe intermediate
-two-body subsystems.
+The nested topology `(((1, 2), 3), 4)` is emitted as `[[[1, 2], 3], 4]`. Leaves are final-state particle indices; nested arrays describe intermediate two-body subsystems.
 
-## Build a JSON-Ready Document
+## 2. Build a JSON-Ready Document
 
-`amplitudeSerializationDict` is the high-level entry point. It calls the lower
-level `serializeToDict` methods, moves referenced lineshapes and form factors
-into the top-level `functions` section, and creates a `distributions` entry.
+`amplitudeSerializationDict` is the high-level entry point. It accepts a `CascadeDecay` model directly (or a `CascadeSystem` / `SystemSpins` with weighted chains), collects referenced lineshapes and form factors into the top-level `"functions"` section, and creates the `"distributions"` entry.
 
 ```julia
 document = amplitudeSerializationDict(
-    system,
-    ["test_chain" => (1.0 + 0.0im, chain)];
+    model;
     particle_labels = ("D0", "pi+", "D-", "K+", "B+"),
-    name = "minimal_four_body_model",
-    variables = ["m1_2sq", "m1_2_3sq"],
+    name            = "minimal_four_body_model",
+    variables       = ["m1_2sq", "m1_2_3sq"],
 )
 ```
 
-The resulting dictionary has the shape
+## 3. Add Optional Sections & Verification Points
 
-```json
-{
-  "distributions": [
-    {
-      "type": "HadronicUnpolarizedIntensity",
-      "name": "minimal_four_body_model",
-      "decay_description": {
-        "kinematics": {},
-        "reference_topology": [[[1, 2], 3], 4],
-        "chains": []
-      },
-      "variables": []
-    }
-  ],
-  "functions": []
-}
-```
-
-## Add Optional Sections
-
-The setter functions are small conveniences around dictionary insertion. They
-normalize Julia `Symbol` keys to JSON string keys and keep the usual schema
-locations easy to remember.
+Setter functions insert or update top-level sections on an existing document dictionary:
 
 ```julia
 setDomains!(
@@ -113,12 +93,9 @@ setDomains!(
 )
 
 setMisc!(document, Dict("analysis" => "minimal example"))
-setParameterPoints!(document, [Dict("name" => "nominal", "parameters" => [])])
 ```
 
-Validation follows the `ThreeBodyDecaysIO.jl` convention: checksum-like values
-belong in `misc.amplitude_model_checksums`, while the numerical coordinates of
-the validation point belong in `parameter_points`.
+Validation stores reference intensities (`"value": |A|^2`) and complex amplitude components in `misc.amplitude_model_checksums`, paired with sampled four-vectors in `parameter_points`:
 
 ```julia
 setValidation!(
@@ -127,35 +104,35 @@ setValidation!(
         "misc" => Dict(
             "amplitude_model_checksums" => [
                 Dict(
-                    "distribution" => "minimal_four_body_model",
-                    "point" => "validation_point",
-                    "value" => 1.0,
+                    "distribution"   => "minimal_four_body_model",
+                    "point"          => "verification_point_1",
+                    "value"          => 1.234,
+                    "amplitude_real" => 1.0,
+                    "amplitude_imag" => 0.4837,
                 ),
             ],
         ),
         "parameter_points" => [
-            Dict("name" => "validation_point", "parameters" => []),
+            Dict(
+                "name" => "verification_point_1",
+                "four_vectors" => Dict(
+                    "D0"  => Dict("E" => 1.52, "px" =>  0.42, "py" => -0.31, "pz" =>  0.18),
+                    "pi+" => Dict("E" => 0.35, "px" => -0.08, "py" =>  0.14, "pz" => -0.05),
+                    "D-"  => Dict("E" => 1.65, "px" => -0.55, "py" =>  0.29, "pz" => -0.41),
+                    "K+"  => Dict("E" => 0.68, "px" =>  0.21, "py" => -0.12, "pz" =>  0.28),
+                ),
+            ),
         ],
     ),
 )
 ```
 
-## Write JSON
+## 4. Write & Read JSON
 
-Use `writeJson` to write an already constructed document.
+Use `writeJson` to save the document or model to disk, and `readJson` to reconstruct `(reloaded_model, reloaded_system, reloaded_doc)` directly from the JSON file:
 
 ```julia
 writeJson("minimal_four_body_model.json", document)
-```
 
-Alternatively, pass a `CascadeSystem` and weighted chain collection directly:
-
-```julia
-writeJson(
-    "minimal_four_body_model.json",
-    system,
-    ["test_chain" => (1.0 + 0.0im, chain)];
-    particle_labels = ("D0", "pi+", "D-", "K+", "B+"),
-    name = "minimal_four_body_model",
-)
+reloaded_model, reloaded_system, reloaded_doc = readJson("minimal_four_body_model.json")
 ```

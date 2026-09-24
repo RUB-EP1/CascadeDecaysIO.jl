@@ -14,7 +14,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
-CascadeDecays = {path = "../CascadeDecays"}
+CascadeDecays = {path = "../CascadeDecays.jl"}
 FourVectors = {rev = "v0.3.4", url = "https://github.com/mmikhasenko/FourVectors.jl"}
 InstructionalDecayTrees = {url = "https://github.com/mmikhasenko/InstructionalDecayTrees.jl"}
 

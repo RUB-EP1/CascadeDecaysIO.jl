@@ -1,5 +1,14 @@
 import HadronicLineshapes: breakup, BlattWeisskopf, BW
 
+@inline function _blatt_weisskopf_sq(l::Int, d::Float64, p)
+    l == 0 && return true
+    l == 1 && return BlattWeisskopf{1}(d)(p)^2
+    l == 2 && return BlattWeisskopf{2}(d)(p)^2
+    l == 3 && return BlattWeisskopf{3}(d)(p)^2
+    l == 4 && return BlattWeisskopf{4}(d)(p)^2
+    return BlattWeisskopf{l}(d)(p)^2
+end
+
 """
     TFPWAMultichannelBreitWigner
 
@@ -18,17 +27,18 @@ function TFPWAMultichannelBreitWigner(
     return TFPWAMultichannelBreitWigner(Float64(m), SVector{N}(channels...))
 end
 
-function (bw::TFPWAMultichannelBreitWigner)(σ::Number)
+@inline function (bw::TFPWAMultichannelBreitWigner)(σ::Number)
     m0 = bw.m
-    mΓ = sum(bw.channels) do channel
-        gsq, ma, mb, l, d = channel.gsq, channel.ma, channel.mb, channel.l, channel.d
-        FF = BlattWeisskopf{l}(d)
-        p = breakup(sqrt(σ), ma, mb)
-        gsq * σ * 2p / sqrt(σ) * FF(p)^2
+    sqrt_σ = sqrt(σ)
+    mΓ = zero(typeof(σ * 1.0))
+    @inbounds for channel in bw.channels
+        p = breakup(sqrt_σ, channel.ma, channel.mb)
+        ff_sq = _blatt_weisskopf_sq(channel.l, channel.d, p)
+        mΓ += channel.gsq * σ * 2p / sqrt_σ * ff_sq
     end
-    BW(σ, m0, mΓ / m0)
+    return BW(σ, m0, mΓ / m0)
 end
-(bw::TFPWAMultichannelBreitWigner)(σ::Real) = bw(σ + 1im * eps())
+@inline (bw::TFPWAMultichannelBreitWigner)(σ::Real) = bw(σ + 1im * eps())
 
 """
     NRExpLineshape
@@ -40,8 +50,8 @@ struct NRExpLineshape <: HadronicLineshapes.AbstractFlexFunc
     m0::Float64
 end
 
-(ls::NRExpLineshape)(σ::Number) = -exp(-ls.αβ * (σ - ls.m0^2))
-(ls::NRExpLineshape)(σ::Real) = ls(σ + 1im * eps())
+@inline (ls::NRExpLineshape)(σ::Number) = -exp(-ls.αβ * (σ - ls.m0 * ls.m0))
+@inline (ls::NRExpLineshape)(σ::Real) = ls(σ + 1im * eps())
 
 """
     NamedLineshape
@@ -55,7 +65,7 @@ struct NamedLineshape{F} <: HadronicLineshapes.AbstractFlexFunc
     lineshape::F
 end
 
-(nl::NamedLineshape)(args...) = nl.lineshape(args...)
-Base.getproperty(nl::NamedLineshape, s::Symbol) =
+@inline (nl::NamedLineshape)(σ) = nl.lineshape(σ)
+@inline (nl::NamedLineshape)(args...) = nl.lineshape(args...)
+@inline Base.getproperty(nl::NamedLineshape, s::Symbol) =
     (s === :name || s === :lineshape) ? getfield(nl, s) : getproperty(getfield(nl, :lineshape), s)
-
