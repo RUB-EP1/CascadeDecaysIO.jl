@@ -1,9 +1,12 @@
 module CascadeDecaysIO
 
 using CascadeDecays
+using FourVectors
 using HadronicLineshapes
 using JSON
 using OrderedCollections
+import Polynomials
+using Random: AbstractRNG, Xoshiro
 using StaticArrays
 using ThreeBodyDecays
 
@@ -12,6 +15,8 @@ import CascadeDecays:
     ConstantLineshape,
     DecayChain,
     DecayTopology,
+    KinematicPoint,
+    KinematicTask,
     SystemSpinParities,
     SystemSpins,
     SystemSpinsOrSpinParities,
@@ -27,7 +32,8 @@ import CascadeDecays:
     propagating_line_inds,
     propagator_two_js,
     root_line_ind,
-    root_two_j
+    root_two_j,
+    unpolarized_intensity
 
 export SystemMasses,
     CascadeSystem
@@ -35,8 +41,9 @@ export SystemMasses,
 """
     SystemMasses(m1, m2, ...; m0)
 
-External system mass descriptor for amplitude serialization kinematics.
-Final-state masses are positional; the root mass is always supplied as keyword `m0`.
+Masses of the external particles in GeV. Final-state masses are positional; the
+mass of the decaying particle is given as keyword `m0`. The amplitude-serialization
+standard requires them in `kinematics` and in the `phase_space` domain.
 """
 struct SystemMasses{Nf, T <: Real}
     finals::SVector{Nf, T}
@@ -86,26 +93,33 @@ root_two_j(system::CascadeSystem) = root_two_j(system.quantum)
 final_masses(system::CascadeSystem) = system.masses.finals
 root_mass(system::CascadeSystem) = system.masses.m0
 
-export appendFunction!,
-    amplitudeSerializationDict,
+export amplitudeSerializationDict,
+    appendFunction!,
     serializeToDict,
-    setDomains!,
     setDistributions!,
+    setDomains!,
     setFunctions!,
     setMisc!,
     setParameterPoints!,
     setSection!,
     setValidation!,
-    setVariables!,
     writeJson,
     dict2instance,
     readJson,
-    TFPWAMultichannelBreitWigner,
-    NRExpLineshape,
+    phaseSpaceDomain,
+    fourVectorPoint,
+    kinematicTask,
+    phaseSpaceEvent,
+    validationEvents,
+    validationSection,
+    validate,
+    GenericFunction,
     NamedLineshape
 
 include("lineshapes.jl")
+include("generic_function.jl")
 include("writer.jl")
+include("validation.jl")
 include("reader.jl")
 
 end

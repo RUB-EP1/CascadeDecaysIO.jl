@@ -1,0 +1,322 @@
+"""
+    fourVectorPoint(name, four_vectors; domain="default")
+
+Validation point in the four-vector format: `four_vectors` are the final-state
+four-momenta (`FourVector`s) in the order of `kinematics.final_state[].index`. The
+initial state is not listed; it is `(m0, 0, 0, 0)` of the referenced domain.
+"""
+function fourVectorPoint(name::AbstractString, four_vectors; domain::AbstractString = "default")
+    return LittleDict{String,Any}(
+        "name" => name,
+        "domain" => domain,
+        "four_vectors" => [
+            LittleDict{String,Any}("index" => i, "E" => p.E, "px" => p.px, "py" => p.py, "pz" => p.pz)
+            for (i, p) in enumerate(four_vectors)
+        ],
+    )
+end
+
+"""
+    kinematicTask(cascade::CascadeDecay)
+
+`KinematicTask` covering every chain topology of `cascade`, with its reference
+topology and Wigner alignment for all final-state particles with spin.
+"""
+function kinematicTask(cascade::CascadeDecay)
+    topologies = Tuple(unique(chain.topology for chain in cascade.chains))
+    spins, _ = _cascade_spins_and_chains(cascade)
+    spinful = Tuple(i for (i, two_j) in enumerate(spins.finals) if two_j != 0)
+    return KinematicTask(topologies; reference_topology = cascade.reference_topology, wigner_finals = spinful)
+end
+
+# ---------------------------------------------------------------------------
+# Phase-space events
+# ---------------------------------------------------------------------------
+
+_node_tree(topology::DecayTopology) = _line_address(topology, root_line_ind(topology))
+_node_tree(tree::Tuple) = tree
+
+_internal_nodes(::Integer) = ()
+_internal_nodes(node::Tuple) = (node, _internal_nodes(node[1])..., _internal_nodes(node[2])...)
+
+# a node without entry in `node_masses` may take any mass
+_mass_spec(node, node_masses) = get(node_masses, node, (0.0, Inf))
+
+_threshold(node, masses, node_masses) =
+    _minimum_mass(node[1], masses, node_masses) + _minimum_mass(node[2], masses, node_masses)
+
+# lowest mass of a node: its fixed mass, or the larger of its lower bound and its threshold
+function _minimum_mass(node, masses, node_masses)
+    node isa Integer && return Float64(masses.finals[node])
+    spec = _mass_spec(node, node_masses)
+    spec isa Real && return Float64(spec)
+    return max(Float64(first(spec)), _threshold(node, masses, node_masses))
+end
+
+function _check_node_masses(tree, masses, node_masses)
+    nodes = (_internal_nodes(tree[1])..., _internal_nodes(tree[2])...)
+    for (node, spec) in node_masses
+        node in nodes || throw(ArgumentError("node $node is not an internal node of the topology $tree"))
+        valid = spec isa Real || (spec isa Tuple && first(spec) < last(spec))
+        valid && (spec isa Real ? spec : last(spec)) >= _threshold(node, masses, node_masses) || throw(ArgumentError(
+            "mass of node $node must be a number or a range (lo, hi) above the threshold of its decay products, got $spec"))
+    end
+    _threshold(tree, masses, node_masses) <= masses.m0 ||
+        throw(ArgumentError("the node masses exceed the initial-state mass $(masses.m0) GeV"))
+    return nothing
+end
+
+# fixed, or uniform between the minimum mass and `upper` (the mass left by the parent)
+function _node_mass(rng, node, upper, masses, node_masses)
+    lower = _minimum_mass(node, masses, node_masses)
+    (node isa Integer || _mass_spec(node, node_masses) isa Real) && return lower
+    return lower + (min(upper, last(_mass_spec(node, node_masses))) - lower) * rand(rng)
+end
+
+# `p` from the rest frame of a system of mass `M` into the frame where it has momentum `P`
+function _boost_from_rest(p, P, M)
+    Pp = P.px * p.px + P.py * p.py + P.pz * p.pz
+    k = Pp / (M * (P.E + M)) + p.E / M
+    return FourVector(p.px + k * P.px, p.py + k * P.py, p.pz + k * P.pz; E = (P.E * p.E + Pp) / M)
+end
+
+# successive isotropic two-body decays of `node` (mass `M`, four-momentum `P`)
+function _decay_node!(final_vectors, rng, node, P, M, masses, node_masses)
+    node isa Integer && return (final_vectors[node] = P)
+    a, b = node
+    m_a = _node_mass(rng, a, M - _minimum_mass(b, masses, node_masses), masses, node_masses)
+    m_b = _node_mass(rng, b, M - m_a, masses, node_masses)
+    q = HadronicLineshapes.breakup(M, m_a, m_b)
+    cosθ, ϕ = 2 * rand(rng) - 1, 2π * rand(rng)
+    n = q .* (sqrt(1 - cosθ^2) * cos(ϕ), sqrt(1 - cosθ^2) * sin(ϕ), cosθ)
+    _decay_node!(final_vectors, rng, a, _boost_from_rest(FourVector(n...; E = sqrt(q^2 + m_a^2)), P, M), m_a, masses, node_masses)
+    _decay_node!(final_vectors, rng, b, _boost_from_rest(FourVector((.-n)...; E = sqrt(q^2 + m_b^2)), P, M), m_b, masses, node_masses)
+    return final_vectors
+end
+
+"""
+    phaseSpaceEvent(rng, masses, topology; node_masses=Dict())
+
+One point of the `phase_space` domain of `masses`: the final-state four-vectors, in
+index order, in the rest frame of the decaying particle. The event is built by
+successive two-body decays along `topology` (a `DecayTopology` or a nested tuple such
+as `(((1, 2), 3), 4)`); at every vertex the first child is emitted isotropically in the
+rest frame of the parent. The mass of an internal node is
+
+- `node_masses[node]` if that is a number (e.g. a particle with fixed mass),
+- uniform in `node_masses[node] = (lo, hi)`, restricted to the kinematic limits,
+- uniform between its kinematic limits otherwise.
+
+Nodes are addressed as in the topology, e.g. `(1, 2)` or `((1, 2), 3)`. The events
+serve as validation points; they are not distributed according to phase space.
+"""
+function phaseSpaceEvent(rng::AbstractRNG, masses::SystemMasses, topology; node_masses = Dict())
+    tree = _node_tree(topology)
+    _check_node_masses(tree, masses, node_masses)
+    m0 = Float64(masses.m0)
+    final_vectors = Vector{Any}(undef, length(masses.finals))
+    _decay_node!(final_vectors, rng, tree, FourVector(0.0, 0.0, 0.0; E = m0), m0, masses, node_masses)
+    return Tuple(final_vectors)
+end
+
+"""
+    validationEvents(cascade, masses; n=3, node_masses=Dict(), topology=cascade.reference_topology,
+                     rng=Xoshiro(1), min_relative_intensity=0.1, pilot=1000, max_tries=100_000)
+
+`n` events of the phase space of `masses` (see [`phaseSpaceEvent`](@ref)) at which
+`cascade` has a substantial intensity. An event is accepted if the unpolarized
+intensity of `cascade` there is at least `min_relative_intensity` times the mean
+intensity of `pilot` events drawn with the same `node_masses`. `node_masses` is one
+dictionary for all events or a vector with one dictionary per event.
+
+A model whose intensity vanishes on all pilot events is an error. Its intensity is then
+non-zero only on a part of the phase space the generator does not reach, typically a
+lineshape narrower than the sampled mass range (e.g. a particle with fixed mass),
+whose node mass has to be fixed in `node_masses`.
+"""
+function validationEvents(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    n::Integer = 3,
+    node_masses = Dict(),
+    topology = cascade.reference_topology,
+    rng::AbstractRNG = Xoshiro(1),
+    min_relative_intensity::Real = 0.1,
+    pilot::Integer = 1000,
+    max_tries::Integer = 100_000,
+    task = kinematicTask(cascade),
+)
+    specs = node_masses isa AbstractDict ? fill(node_masses, n) : collect(node_masses)
+    length(specs) == n || throw(ArgumentError("node_masses has $(length(specs)) entries for $n events"))
+    draw(spec) = phaseSpaceEvent(rng, masses, topology; node_masses = spec)
+    intensity(event) = unpolarized_intensity(cascade, KinematicPoint(task, event))
+    scales = Dict{Any,Float64}()
+    return map(specs) do spec
+        scale = get!(() -> sum(intensity(draw(spec)) for _ in 1:pilot) / pilot, scales, spec)
+        scale > 0 && isfinite(scale) || throw(ArgumentError(
+            "mean intensity $scale over $pilot events with node masses $spec: the model is non-zero only " *
+            "where the generator does not sample, e.g. on a lineshape narrower than the sampled mass range; " *
+            "fix that node mass with node_masses = Dict(node => mass)"))
+        for _ in 1:max_tries
+            event = draw(spec)
+            intensity(event) >= min_relative_intensity * scale && return event
+        end
+        throw(ArgumentError("no event with intensity >= $(min_relative_intensity) x mean in $max_tries tries"))
+    end
+end
+
+"""
+    validationSection(cascade, events; distribution, domain="default", prefix="validation_point", task=kinematicTask(cascade))
+    validationSection(cascade, masses::SystemMasses; distribution, n=3, kwargs...)
+
+Validation entries for a list of events, each event a tuple of final-state
+`FourVector`s. Returns `(; parameter_points, checksums)`: one four-vector point per
+event and one checksum with the unpolarized intensity `Σ|A|²` of `cascade` at that
+point. A point with vanishing intensity tests nothing and is an error. Pass the result
+to [`setValidation!`](@ref) or to `amplitudeSerializationDict(...; validation)`.
+
+With `masses` instead of events, `n` events are generated by [`validationEvents`](@ref),
+which takes the remaining keywords (`node_masses`, `topology`, `rng`,
+`min_relative_intensity`, ...).
+"""
+function validationSection(
+    cascade::CascadeDecay,
+    events;
+    distribution::AbstractString,
+    domain::AbstractString = "default",
+    prefix::AbstractString = "validation_point",
+    task = kinematicTask(cascade),
+)
+    parameter_points = Any[]
+    checksums = Any[]
+    for (n, event) in enumerate(events)
+        name = "$prefix$n"
+        intensity = unpolarized_intensity(cascade, KinematicPoint(task, Tuple(event)))
+        intensity > 0 && isfinite(intensity) || throw(ArgumentError(
+            "intensity $intensity at validation point $n: a validation point needs a non-zero amplitude"))
+        push!(parameter_points, fourVectorPoint(name, event; domain))
+        push!(checksums, LittleDict{String,Any}("point" => name, "distribution" => distribution, "value" => intensity))
+    end
+    return (; parameter_points, checksums)
+end
+
+function validationSection(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    distribution::AbstractString,
+    domain::AbstractString = "default",
+    prefix::AbstractString = "validation_point",
+    task = kinematicTask(cascade),
+    kwargs...,
+)
+    events = validationEvents(cascade, masses; task, kwargs...)
+    return validationSection(cascade, events; distribution, domain, prefix, task)
+end
+
+_mass_squared(p) = p.E^2 - p.px^2 - p.py^2 - p.pz^2
+
+function _four_vectors(point::AbstractDict)
+    entries = sort(collect(point["four_vectors"]); by = v -> Int(v["index"]))
+    return Tuple(FourVector(Float64(v["px"]), Float64(v["py"]), Float64(v["pz"]); E = Float64(v["E"])) for v in entries)
+end
+
+# deviation of a four-vector point from a phase_space domain
+function _phase_space_offsets(four_vectors, domain::AbstractDict)
+    masses = Float64.(domain["final_state_masses"])
+    length(masses) == length(four_vectors) ||
+        throw(ArgumentError("point has $(length(four_vectors)) four-vectors, domain \"$(domain["name"])\" $(length(masses)) masses"))
+    # squared masses: well conditioned also for massless particles
+    mass2_offset = maximum(abs(_mass_squared(p) - m^2) for (p, m) in zip(four_vectors, masses))
+    total(component) = sum(p -> getproperty(p, component), four_vectors)
+    momentum_offset = max(abs(total(:E) - Float64(domain["m0"])), abs(total(:px)), abs(total(:py)), abs(total(:pz)))
+    return (; mass2_offset, momentum_offset)
+end
+
+const _NO_OFFSETS = (; mass2_offset = NaN, momentum_offset = NaN)
+
+function _point_offsets(point, four_vectors, domains)
+    haskey(point, "domain") || return _NO_OFFSETS
+    name = point["domain"]
+    haskey(domains, name) || throw(ArgumentError("point \"$(point["name"])\" refers to unknown domain \"$name\""))
+    domains[name]["type"] == "phase_space" || return _NO_OFFSETS
+    return _phase_space_offsets(four_vectors, domains[name])
+end
+
+"""
+    validate(document; custom_functions=Dict(), rtol=1e-10, atol_phase_space=1e-8)
+    validate(document, cascade; distribution=1, kwargs...)
+    validate(path; kwargs...)
+
+Recompute every entry of `misc.amplitude_model_checksums`:
+
+- `"distribution"` names a distribution of the document: the unpolarized intensity of
+  that distribution at the four-vector point. If the point refers to a `phase_space`
+  domain, it is also checked against it: on-shell final states (|p² − m²| in GeV²)
+  and total four-momentum `(m0, 0, 0, 0)` (in GeV), both within `atol_phase_space`.
+- `"distribution"` names a function: that function at the single parameter of the
+  point (lineshape checksum).
+
+Any other name is an error. With `cascade` given, it is used for the distribution
+selected by `distribution`; all other distributions are built from the document.
+Returns one named tuple per checksum with the expected and computed value and `passed`.
+"""
+function validate(
+    document::AbstractDict,
+    cascade::Union{CascadeDecay, Nothing} = nothing;
+    distribution = 1,
+    custom_functions = Dict{String,Any}(),
+    rtol::Real = 1e-10,
+    atol_phase_space::Real = 1e-8,
+)
+    points = Dict(p["name"] => p for p in document["parameter_points"])
+    domains = Dict(d["name"] => d for d in document["domains"])
+    distribution_names = [d["name"] for d in document["distributions"]]
+    workspace = _build_function_workspace(document["functions"]; custom_functions)
+    models = Dict{String,Any}()
+    if cascade !== nothing
+        given = _select_distribution(document, distribution)["name"]
+        models[given] = (cascade, kinematicTask(cascade))
+    end
+    model(name) = get!(models, name) do
+        c = dict2instance(CascadeDecay, document; distribution = name, workspace)
+        (c, kinematicTask(c))
+    end
+
+    results = []
+    for checksum in document["misc"]["amplitude_model_checksums"]
+        haskey(points, checksum["point"]) ||
+            throw(ArgumentError("checksum refers to unknown point \"$(checksum["point"])\""))
+        point = points[checksum["point"]]
+        target = checksum["distribution"]
+        expected = _parse_complex(checksum["value"])
+        if target in distribution_names
+            haskey(point, "four_vectors") ||
+                throw(ArgumentError("point \"$(point["name"])\" of distribution \"$target\" has no four_vectors"))
+            four_vectors = _four_vectors(point)
+            c, task = model(target)
+            computed = unpolarized_intensity(c, KinematicPoint(task, four_vectors))
+            offsets = _point_offsets(point, four_vectors, domains)
+        elseif haskey(workspace, target)
+            computed = workspace[target](Float64(only(point["parameters"])["value"]))
+            offsets = _NO_OFFSETS
+        else
+            throw(ArgumentError("checksum refers to \"$target\", which is neither a distribution nor a function"))
+        end
+        on_domain = isnan(offsets.mass2_offset) ||
+            (offsets.mass2_offset <= atol_phase_space && offsets.momentum_offset <= atol_phase_space)
+        relative_difference = abs(computed - expected) / max(abs(expected), floatmin(Float64))
+        push!(results, (;
+            point = checksum["point"],
+            distribution = target,
+            expected,
+            computed,
+            relative_difference,
+            offsets.mass2_offset,
+            offsets.momentum_offset,
+            passed = relative_difference <= rtol && on_domain,
+        ))
+    end
+    return results
+end
+
+validate(path::AbstractString; kwargs...) = validate(JSON.parsefile(path; dicttype = LittleDict{String,Any}); kwargs...)

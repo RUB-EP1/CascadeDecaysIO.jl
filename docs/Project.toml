@@ -11,10 +11,8 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
-CascadeDecays = {url = "https://github.com/RUB-EP1/CascadeDecays.jl.git", rev = "904e24829ce683a5a09d746f1059cd6df9bc306c"}
+CascadeDecays = {url = "https://github.com/RUB-EP1/CascadeDecays.jl.git", rev = "e7241ff15aa1142ac8953fd7f378560ccc9ead46"}
 CascadeDecaysIO = {path = ".."}
-FourVectors = {url = "https://github.com/mmikhasenko/FourVectors.jl", rev = "0ce8f0d419dcac15ba9e261c088292a1f6f6fe0e"}
-InstructionalDecayTrees = {url = "https://github.com/mmikhasenko/InstructionalDecayTrees.jl", rev = "9afbe76f45783ca49ef0d7ecde8b537eceec125a"}
 
 [compat]
 Documenter = "1"

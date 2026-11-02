@@ -1,6 +1,3 @@
-const _COMPLEX_RE = r"^([+-]?[0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*([+-])\s*([0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)i$"
-const _IMAG_RE = r"^([+-]?[0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)i$"
-
 function _json_to_tuple(node)
     if node isa AbstractVector
         return Tuple(_json_to_tuple(x) for x in node)
@@ -11,155 +8,132 @@ function _json_to_tuple(node)
     end
 end
 
+# Spins, helicities and s: strings "n" or "n/2" as in the standard (pattern of the
+# schema's Spin); numbers are accepted when they are integer or half-integer
+const _SPIN_PATTERN = r"^(?![-+]0)([-+]?\d+)(/2)?$"
+
 function _spin_to_two_j(s)
-    if s isa Integer
-        return 2 * Int(s)
-    elseif s isa Real
-        return round(Int, 2 * s)
-    elseif s isa AbstractString
-        str = strip(s)
-        slash_idx = findfirst('/', str)
-        if slash_idx !== nothing
-            num = parse(Float64, @view str[1:prevind(str, slash_idx)])
-            den = parse(Float64, @view str[nextind(str, slash_idx):end])
-            return round(Int, 2 * (num / den))
-        else
-            return round(Int, 2 * parse(Float64, str))
-        end
+    s isa Integer && return 2 * Int(s)
+    if s isa Real
+        isinteger(2s) || throw(ArgumentError("spin $s is not a multiple of 1/2"))
+        return Int(2s)
     end
-    error("Could not parse spin from: $s")
+    s isa AbstractString || throw(ArgumentError("could not parse spin from $(repr(s))"))
+    m = match(_SPIN_PATTERN, strip(s))
+    m === nothing && throw(ArgumentError("spin $(repr(s)) is not of the form \"n\" or \"n/2\""))
+    n = parse(Int, m.captures[1])
+    return m.captures[2] === nothing ? 2n : n
+end
+
+# orbital angular momenta: non-negative integers, as number or string
+function _parse_int(x)
+    value = x isa Integer ? Int(x) : x isa AbstractString ? tryparse(Int, strip(x)) : nothing
+    (value === nothing || value < 0) && throw(ArgumentError("expected a non-negative integer, got $(repr(x))"))
+    return value
 end
 
 function _parse_complex(s)
     s isa Number && return ComplexF64(s)
     str = strip(string(s))
-    # Fast path for "re + im*i" or "re - im*i" without regex allocations
     if endswith(str, 'i')
         body = @view str[1:prevind(str, lastindex(str))]
-        split_idx = nothing
         idx = lastindex(body)
-        first_idx = firstindex(body)
-        while idx > first_idx
+        while idx > firstindex(body)
             c = body[idx]
-            if c == '+' || c == '-'
-                prev_c = body[prevind(body, idx)]
-                if prev_c != 'e' && prev_c != 'E'
-                    split_idx = idx
-                    break
+            if (c == '+' || c == '-') && !(body[prevind(body, idx)] in ('e', 'E'))
+                re_val = tryparse(Float64, strip(@view body[1:prevind(body, idx)]))
+                im_val = tryparse(Float64, strip(@view body[nextind(body, idx):end]))
+                if re_val !== nothing && im_val !== nothing
+                    return ComplexF64(re_val, c == '-' ? -im_val : im_val)
                 end
+                break
             end
             idx = prevind(body, idx)
         end
-        if split_idx !== nothing
-            re_str = strip(@view body[1:prevind(body, split_idx)])
-            im_str = strip(@view body[nextind(body, split_idx):end])
-            re_val = tryparse(Float64, re_str)
-            im_val = tryparse(Float64, im_str)
-            if re_val !== nothing && im_val !== nothing
-                sign = body[split_idx] == '-' ? -1.0 : 1.0
-                return ComplexF64(re_val, sign * im_val)
-            end
-        else
-            im_only = tryparse(Float64, strip(body))
-            im_only !== nothing && return ComplexF64(0.0, im_only)
-        end
+        im_only = tryparse(Float64, strip(body))
+        im_only !== nothing && return ComplexF64(0.0, im_only)
     else
         re_only = tryparse(Float64, str)
         re_only !== nothing && return ComplexF64(re_only, 0.0)
     end
+    throw(ArgumentError("could not parse complex number $(repr(str))"))
+end
 
-    # Fallback regex path
-    m = match(_COMPLEX_RE, str)
-    if m !== nothing
-        re = parse(Float64, m.captures[1])
-        sign = m.captures[2] == "-" ? -1.0 : 1.0
-        im = parse(Float64, m.captures[3])
-        return ComplexF64(re, sign * im)
-    end
-    m_im = match(_IMAG_RE, replace(str, " " => ""))
-    if m_im !== nothing
-        return ComplexF64(0.0, parse(Float64, m_im.captures[1]))
-    end
-    error("Could not parse complex number: $str")
+_channels(fn) = [
+    (; gsq = Float64(c["gsq"]), ma = Float64(c["ma"]), mb = Float64(c["mb"]), l = _parse_int(c["l"]), d = Float64(c["d"]))
+    for c in collect(fn["channels"])
+]
+
+# constant -> CascadeDecays.ConstantLineshape; otherwise Polynomials.Polynomial (ascending powers of sigma)
+function _polynomial(fn)
+    coefficients = Float64.(fn["coefficients"])
+    length(coefficients) == 1 && return ConstantLineshape(ComplexF64(only(coefficients)))
+    return Polynomials.Polynomial(coefficients)
 end
 
 """
-    CustomExpressionLineshape
+    _build_function_workspace(functions; custom_functions)
 
-Fallback container for custom analytic lineshape expressions read from amplitude-serialization files.
+Map every entry of the `functions` section to a callable: standard types to
+CascadeDecays / HadronicLineshapes objects, `generic_function` to a
+[`GenericFunction`](@ref). Anything else must be bound by name via
+`custom_functions`; otherwise reading fails instead of guessing.
 """
-struct CustomExpressionLineshape <: HadronicLineshapes.AbstractFlexFunc
-    expression::String
-    parameters::Dict{String,Any}
-end
-@inline (ls::CustomExpressionLineshape)(σ) = 1.0 + 0.0im
-
-function _parse_channels(raw_channels)
-    return [
-        (;
-            gsq = Float64(ch["gsq"]),
-            ma = Float64(ch["ma"]),
-            mb = Float64(ch["mb"]),
-            l = Int(ch["l"]),
-            d = Float64(ch["d"]),
-        ) for ch in raw_channels
-    ]
-end
-
 function _build_function_workspace(functions_list; custom_functions = Dict{String,Any}())
     workspace = Dict{String,Any}()
-    sizehint!(workspace, length(functions_list))
     for fn in functions_list
         name = fn["name"]
-        if haskey(custom_functions, name)
-            workspace[name] = custom_functions[name]
-            continue
-        end
-        fn_type = get(fn, "type", "")
-        subtype = get(fn, "subtype", "")
-        if fn_type == "BlattWeisskopf"
-            l = Int(fn["l"])
-            r = Float64(fn["radius"])
-            workspace[name] = HadronicLineshapes.BlattWeisskopf{l}(r)
-        elseif fn_type == "MomentumPower"
-            l = Int(fn["l"])
-            workspace[name] = HadronicLineshapes.MomentumPower{l}()
-        elseif fn_type == "ConstantLineshape"
-            val = _parse_complex(fn["value"])
-            workspace[name] = ConstantLineshape(val)
-        elseif fn_type == "BreitWigner"
-            m = Float64(fn["mass"])
-            w = Float64(fn["width"])
-            ma = Float64(fn["ma"])
-            mb = Float64(fn["mb"])
-            l = Int(fn["l"])
-            d = Float64(fn["d"])
-            workspace[name] = HadronicLineshapes.BreitWigner(m, w, ma, mb, l, d)
-        elseif fn_type == "MultichannelBreitWigner" || (fn_type == "custom" && subtype == "MultichannelBreitWigner")
-            m = Float64(fn["mass"])
-            workspace[name] = HadronicLineshapes.MultichannelBreitWigner(m, _parse_channels(fn["channels"]))
-        elseif fn_type == "TFPWAMultichannelBreitWigner" || (fn_type == "custom" && (subtype == "TFPWAMultichannelBreitWigner" || haskey(fn, "channels")))
-            m = Float64(fn["mass"])
-            workspace[name] = TFPWAMultichannelBreitWigner(m, _parse_channels(fn["channels"]))
-        elseif fn_type == "NRExpLineshape" || (fn_type == "custom" && (subtype == "NRExpLineshape" || (haskey(fn, "alpha") && haskey(fn, "beta"))))
-            alpha = Float64(fn["alpha"])
-            beta = Float64(fn["beta"])
-            m0 = Float64(fn["m0"])
-            workspace[name] = NRExpLineshape(alpha + 1im * beta, m0)
-        elseif fn_type == "custom"
-            expr = get(fn, "expression", "")
-            workspace[name] = CustomExpressionLineshape(expr, Dict{String,Any}())
-        else
-            workspace[name] = fn
-        end
+        haskey(workspace, name) && throw(ArgumentError("function \"$name\" is defined twice"))
+        # every function keeps its name, so that a model read from a file can be written again
+        workspace[name] = NamedLineshape(name, _function_instance(fn; custom_functions))
     end
     return workspace
 end
 
-@inline function _extract_kinematics_dict(dict::AbstractDict)
+function _function_instance(fn; custom_functions = Dict{String,Any}())
+    name = fn["name"]
+    haskey(custom_functions, name) && return custom_functions[name]
+    type = get(fn, "type", "")
+    type == "BlattWeisskopf" && return HadronicLineshapes.BlattWeisskopf{_parse_int(fn["l"])}(Float64(fn["radius"]))
+    type == "MomentumPower" && return HadronicLineshapes.MomentumPower{_parse_int(fn["l"])}()
+    type == "BreitWigner" && return HadronicLineshapes.BreitWigner(
+        Float64(fn["mass"]), Float64(fn["width"]), Float64(fn["ma"]), Float64(fn["mb"]),
+        _parse_int(fn["l"]), Float64(fn["d"]))
+    type == "MultichannelBreitWigner" && return HadronicLineshapes.MultichannelBreitWigner(Float64(fn["mass"]), _channels(fn))
+    type == "Polynomial" && return _polynomial(fn)
+    type == "generic_function" && return GenericFunction(fn["expression"])
+    throw(ArgumentError("function \"$name\" has type \"$type\", which CascadeDecaysIO cannot evaluate; " *
+        "bind it with custom_functions = Dict(\"$name\" => f)"))
+end
+
+"""
+    _select_distribution(dict, distribution)
+
+The distribution `distribution` (index or name) of a document. Only
+`HadronicUnpolarizedIntensity` is supported.
+"""
+function _select_distribution(dict::AbstractDict, distribution)
+    haskey(dict, "distributions") || return nothing
+    distributions = dict["distributions"]
+    selected = if distribution isa Integer
+        1 <= distribution <= length(distributions) ||
+            throw(ArgumentError("document has $(length(distributions)) distributions, not $distribution"))
+        distributions[distribution]
+    else
+        index = findfirst(d -> d["name"] == distribution, distributions)
+        index === nothing && throw(ArgumentError("document has no distribution named \"$distribution\""))
+        distributions[index]
+    end
+    type = get(selected, "type", "")
+    type == "HadronicUnpolarizedIntensity" ||
+        throw(ArgumentError("distribution \"$(selected["name"])\" has type \"$type\"; only HadronicUnpolarizedIntensity is supported"))
+    return selected
+end
+
+function _extract_kinematics_dict(dict::AbstractDict; distribution = 1)
     haskey(dict, "kinematics") && return dict["kinematics"]
     haskey(dict, "decay_description") && return dict["decay_description"]["kinematics"]
-    haskey(dict, "distributions") && return dict["distributions"][1]["decay_description"]["kinematics"]
+    haskey(dict, "distributions") && return _select_distribution(dict, distribution)["decay_description"]["kinematics"]
     return dict
 end
 
@@ -169,128 +143,115 @@ end
     return sort(collect(raw_finals), by = x -> x["index"])
 end
 
-"""
-    dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
-
-Deserialize a `CascadeSystem` from an amplitude-serialization dictionary.
-If masses are absent from kinematics, they default to 0.0.
-"""
-function dict2instance(::Type{CascadeSystem}, dict::AbstractDict)
-    kin = _extract_kinematics_dict(dict)
-    ini = kin["initial_state"]
-    finals = _sorted_final_states(kin)
-
-    m0 = haskey(ini, "mass") ? Float64(ini["mass"]) : 0.0
-    two_h0 = _spin_to_two_j(ini["spin"])
-
-    final_m = ntuple(i -> haskey(finals[i], "mass") ? Float64(finals[i]["mass"]) : 0.0, length(finals))
-    final_two_j = ntuple(i -> _spin_to_two_j(finals[i]["spin"]), length(finals))
-
-    masses = SystemMasses(final_m...; m0 = m0)
-    spins = SystemSpins(final_two_j...; two_h0 = two_h0)
-    return CascadeSystem(spins, masses)
+function _state_mass(state)
+    haskey(state, "mass") || throw(ArgumentError("kinematics entry \"$(state["name"])\" has no mass"))
+    state["mass"] isa Real || throw(ArgumentError(
+        "mass of \"$(state["name"])\" refers to a parameter ($(repr(state["mass"]))); only numbers are supported"))
+    return Float64(state["mass"])
 end
 
 """
     dict2instance(::Type{SystemSpins}, dict::AbstractDict)
 
-Deserialize `SystemSpins` from an amplitude-serialization kinematics dictionary.
+Deserialize the external spins from an amplitude-serialization document or its
+`kinematics` section.
 """
-function dict2instance(::Type{SystemSpins}, dict::AbstractDict)
-    kin = _extract_kinematics_dict(dict)
-    ini = kin["initial_state"]
+function dict2instance(::Type{SystemSpins}, dict::AbstractDict; distribution = 1)
+    kin = _extract_kinematics_dict(dict; distribution)
     finals = _sorted_final_states(kin)
-    two_h0 = _spin_to_two_j(ini["spin"])
+    two_h0 = _spin_to_two_j(kin["initial_state"]["spin"])
     final_two_j = ntuple(i -> _spin_to_two_j(finals[i]["spin"]), length(finals))
     return SystemSpins(final_two_j...; two_h0 = two_h0)
 end
 
 """
-    dict2instance(::Type{CascadeDecay}, dict::AbstractDict; custom_functions=Dict(), workspace=nothing)
+    dict2instance(::Type{CascadeSystem}, dict::AbstractDict; distribution=1)
 
-Deserialize a `CascadeDecay` model container from an amplitude-serialization document dictionary.
-Custom functions can be passed via `custom_functions` to be set by reasonable functions.
+Deserialize spins and masses of the external particles. Masses are required.
 """
-function dict2instance(::Type{CascadeDecay}, dict::AbstractDict; custom_functions = Dict{String,Any}(), workspace = nothing)
-    functions_list = get(dict, "functions", Any[])
-    if workspace === nothing
-        workspace = _build_function_workspace(functions_list; custom_functions)
+function dict2instance(::Type{CascadeSystem}, dict::AbstractDict; distribution = 1)
+    kin = _extract_kinematics_dict(dict; distribution)
+    finals = _sorted_final_states(kin)
+    masses = SystemMasses(map(_state_mass, finals)...; m0 = _state_mass(kin["initial_state"]))
+    return CascadeSystem(dict2instance(SystemSpins, kin), masses)
+end
+
+function _recoupling(v::AbstractDict)
+    type = v["type"]
+    if type == "ls"
+        return ThreeBodyDecays.RecouplingLS((2 * _parse_int(v["l"]), _spin_to_two_j(v["s"])))
+    elseif type == "helicity"
+        h = v["helicities"]
+        return ThreeBodyDecays.NoRecoupling(_spin_to_two_j(h[1]), _spin_to_two_j(h[2]))
+    elseif type == "parity"
+        h = v["helicities"]
+        return ThreeBodyDecays.ParityRecoupling(_spin_to_two_j(h[1]), _spin_to_two_j(h[2]), v["parity_factor"] == "+")
     end
+    throw(ArgumentError("unknown vertex type \"$type\""))
+end
+
+function _formfactor(v::AbstractDict, workspace)
+    name = get(v, "formfactor", "")
+    isempty(name) && return ThreeBodyDecays.NoFormFactor()
+    haskey(workspace, name) || throw(ArgumentError("vertex $(v["node"]) refers to unknown form factor \"$name\""))
+    return workspace[name]
+end
+
+function _lineshape(p::AbstractDict, workspace)
+    name = p["parametrization"]
+    haskey(workspace, name) || throw(ArgumentError("propagator $(p["node"]) refers to unknown function \"$name\""))
+    return workspace[name]
+end
+
+"""
+    dict2instance(::Type{CascadeDecay}, dict::AbstractDict; distribution=1, custom_functions=Dict(), workspace=nothing)
+
+Deserialize a `CascadeDecay` from an amplitude-serialization document. `distribution`
+selects the distribution by index or name. Functions of a type CascadeDecaysIO cannot
+evaluate must be bound by name in `custom_functions`. Every lineshape and form factor
+is wrapped in a [`NamedLineshape`](@ref) carrying its name from the file.
+"""
+function dict2instance(::Type{CascadeDecay}, dict::AbstractDict;
+        distribution = 1, custom_functions = Dict{String,Any}(), workspace = nothing)
+    workspace = something(workspace, _build_function_workspace(get(dict, "functions", Any[]); custom_functions))
 
     decay_desc = if haskey(dict, "decay_description")
         dict["decay_description"]
     elseif haskey(dict, "distributions")
-        dict["distributions"][1]["decay_description"]
+        _select_distribution(dict, distribution)["decay_description"]
     else
         dict
     end
 
-    kin = decay_desc["kinematics"]
-    spins = dict2instance(SystemSpins, kin)
-
+    spins = dict2instance(SystemSpins, decay_desc["kinematics"])
     ref_topology = DecayTopology(_json_to_tuple(decay_desc["reference_topology"]))
     chains_data = decay_desc["chains"]
-    n_chains = length(chains_data)
 
-    chains = Vector{DecayChain}(undef, n_chains)
-    couplings = Vector{ComplexF64}(undef, n_chains)
-    names = Vector{String}(undef, n_chains)
-
-    @inbounds for (idx, ch_data) in enumerate(chains_data)
-        names[idx] = string(ch_data["name"])
-        couplings[idx] = _parse_complex(ch_data["weight"])
-        top = DecayTopology(_json_to_tuple(ch_data["topology"]))
-
-        raw_props = ch_data["propagators"]
-        props = ntuple(length(raw_props)) do j
-            p = raw_props[j]
-            node_tuple = _json_to_tuple(p["node"])
-            spin_two_j = _spin_to_two_j(p["spin"])
-            lineshape = workspace[p["parametrization"]]
-            node_tuple => Propagator(spin_two_j, lineshape)
-        end
-
-        raw_verts = ch_data["vertices"]
-        verts = ntuple(length(raw_verts)) do j
-            v = raw_verts[j]
-            node_tuple = _json_to_tuple(v["node"])
-            ff_name = get(v, "formfactor", "")
-            ff = (isempty(ff_name) || !haskey(workspace, ff_name)) ? ThreeBodyDecays.NoFormFactor() : workspace[ff_name]
-            v_type = v["type"]
-            recoupling = if v_type == "ls"
-                ThreeBodyDecays.RecouplingLS((_spin_to_two_j(v["l"]), _spin_to_two_j(v["s"])))
-            elseif v_type == "helicity"
-                hels = v["helicities"]
-                ThreeBodyDecays.NoRecoupling(_spin_to_two_j(hels[1]), _spin_to_two_j(hels[2]))
-            elseif v_type == "parity"
-                hels = v["helicities"]
-                ThreeBodyDecays.ParityRecoupling(_spin_to_two_j(hels[1]), _spin_to_two_j(hels[2]), v["parity_factor"] == "+")
-            else
-                error("Unknown vertex recoupling type: $v_type")
-            end
-            node_tuple => Vertex(recoupling, ff)
-        end
-
-        chains[idx] = DecayChain(top, spins; propagators = props, vertices = verts)
+    chains = map(chains_data) do ch
+        props = Tuple(_json_to_tuple(p["node"]) => Propagator(_spin_to_two_j(p["spin"]), _lineshape(p, workspace))
+                      for p in ch["propagators"])
+        verts = Tuple(_json_to_tuple(v["node"]) => Vertex(_recoupling(v), _formfactor(v, workspace))
+                      for v in ch["vertices"])
+        DecayChain(DecayTopology(_json_to_tuple(ch["topology"])), spins; propagators = props, vertices = verts)
     end
 
     return CascadeDecay(
         Tuple(chains),
         ref_topology;
-        couplings = Tuple(couplings),
-        names = Tuple(names),
+        couplings = Tuple(_parse_complex(ch["weight"]) for ch in chains_data),
+        names = Tuple(string(ch["name"]) for ch in chains_data),
     )
 end
 
 """
-    readJson(path::AbstractString; custom_functions=Dict{String,Any}())
+    readJson(path; distribution=1, custom_functions=Dict())
 
-Read an amplitude-serialization JSON file and return `(cascade::CascadeDecay, system::CascadeSystem, document::LittleDict)`.
-`custom_functions` can be provided to set custom lineshapes to reasonable functions.
+Read an amplitude-serialization JSON file and return `(cascade, system, document)` for
+the distribution selected by index or name.
 """
-function readJson(path::AbstractString; custom_functions = Dict{String,Any}())
+function readJson(path::AbstractString; distribution = 1, custom_functions = Dict{String,Any}())
     dict = JSON.parsefile(path; dicttype = LittleDict{String,Any})
-    cascade = dict2instance(CascadeDecay, dict; custom_functions)
-    system = dict2instance(CascadeSystem, dict)
+    cascade = dict2instance(CascadeDecay, dict; distribution, custom_functions)
+    system = dict2instance(CascadeSystem, dict; distribution)
     return cascade, system, dict
 end

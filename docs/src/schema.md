@@ -1,49 +1,48 @@
 # Schema Notes
 
-`CascadeDecaysIO.jl` follows the [Amplitude Serialization Format](https://github.com/RUB-EP1/amplitude-serialization) and `ThreeBodyDecaysIO.jl` document conventions, extending the topology representation to binary cascade trees with arbitrary numbers of final-state particles.
+`CascadeDecaysIO.jl` follows the [amplitude-serialization](https://github.com/RUB-EP1/amplitude-serialization) format and produces the same structure as its reference models. Events for validation are final-state four-vectors as introduced in [amplitude-serialization#111](https://github.com/RUB-EP1/amplitude-serialization/pull/111). Binary cascade topologies with any number of final-state particles are supported.
 
 ## Document Sections
 
-A complete document built by `amplitudeSerializationDict` contains:
+`amplitudeSerializationDict` always writes the five sections the schema requires:
 
-- `distributions`: model entries such as `HadronicUnpolarizedIntensity`.
-- `functions`: named lineshapes and form factors referenced by decay chains.
-
-Additional sections can be supplied by keyword arguments or setter helpers:
-
-- `domains`: allowed ranges for kinematic variables.
-- `misc`: free-form metadata and `amplitude_model_checksums`.
-- `parameter_points`: named numerical points (including `four_vectors`) used for verification.
+- `distributions`: one `HadronicUnpolarizedIntensity` with its `decay_description`.
+- `functions`: named lineshapes and form factors referenced by the chains.
+- `domains`: by default one `phase_space` domain with `m0` and `final_state_masses`.
+- `misc`: `amplitude_model_checksums` only.
+- `parameter_points`: validation points with `four_vectors`.
 
 ## Decay Description
 
-Each distribution contains a `decay_description` dictionary with:
-
-- `kinematics`: `initial_state` and `final_state` particle names, indices, and spins (masses are omitted by default so event-dependent masses are provided via four-vectors).
-- `reference_topology`: nested array representation of the reference cascade tree.
-- `chains`: weighted chain descriptions (`name`, `weight`, `topology`, `propagators`, `vertices`).
+- `kinematics`: `initial_state` (index 0) and `final_state` entries with `index`, `name`, `spin` and `mass`. Masses are required.
+- `reference_topology`: nested-array cascade tree that fixes the frames of the external helicities.
+- `chains`: `name`, `weight`, `topology`, `propagators`, `vertices`.
 
 ## Topology Nodes
 
-Topology nodes use final-state indices as leaves. Nested arrays describe intermediate two-body subsystems:
+Leaves are final-state indices; nested arrays are two-body subsystems:
 
 ```json
 [[[1, 2], 3], 4]
 ```
 
-means that particles `1` and `2` form a subsystem, that subsystem combines with particle `3`, and the resulting subsystem combines with particle `4`.
+## Propagators, Vertices and Functions
 
-## Spins, LS Values, and Function Names
+- A **propagator** sits on an internal node and references a lineshape of the node's invariant mass squared (`"parametrization"`). Its numerator is 1.
+- A **vertex** sits on every node and holds the recoupling (`ls`, `helicity`, `parity`) and a `"formfactor"` reference (`""` for none). The form factor is evaluated at `(m_X², m_A², m_B²)` with the invariant masses of the event and is not normalized.
+- `x` names the argument of `BreitWigner`, `MultichannelBreitWigner` and `Polynomial`: `m_12_sq` for node `[1, 2]`, `m_12_3_sq` for `[[1, 2], 3]`, `m_34_sq` for `[3, 4]`.
+- `generic_function` expressions use one free variable, conventionally `sigma`.
 
-`CascadeDecays.jl` and `ThreeBodyDecays.jl` store angular momenta internally as doubled integers (`2J`, `2L`, `2S`). `CascadeDecaysIO.jl` converts automatically between doubled integers and standard angular-momentum units (`J`, `L`, `S`) when writing and reading:
+## Spins and Angular Momenta
 
-- `Propagator(2, ...)` $\leftrightarrow$ `"spin": 1`.
-- `RecouplingLS((0, 2))` $\leftrightarrow$ `"l": 0`, `"s": 1`.
-- Wrapping a lineshape in `NamedLineshape("lineshape_ResA", ls)` emits `"parametrization": "lineshape_ResA"` in the chain and `"name": "lineshape_ResA"` in `"functions"`.
+`CascadeDecays.jl` and `ThreeBodyDecays.jl` store `2J`, `2L`, `2S` and `2λ` internally. The JSON uses strings in ordinary units:
 
-## Validation & Verification Points
+- `Propagator(2, ...)` ↔ `"spin": "1"`
+- `RecouplingLS((4, 2))` ↔ `"l": "2"`, `"s": "1"`
+- `NoRecoupling(1, -1)` ↔ `"helicities": ["1/2", "-1/2"]`
 
-Validation entries are stored in top-level sections:
+## Validation
 
-- `misc.amplitude_model_checksums` stores expected unpolarized intensities (`"value": |A|^2`) as well as `"amplitude_real"` and `"amplitude_imag"`.
-- `parameter_points` stores the corresponding sampled `four_vectors` for each final-state particle.
+- `parameter_points`: `{"name", "domain", "four_vectors": [{"index", "E", "px", "py", "pz"}, ...]}` with the final states in index order; the initial state is `(m0, 0, 0, 0)` of the domain.
+- `misc.amplitude_model_checksums`: `{"point", "distribution", "value"}` with the unpolarized intensity `Σ|A|²`.
+- Lineshape checksums may use a scalar point, e.g. `{"name": "p", "parameters": [{"name": "m_12_sq", "value": 0.6}]}` with `"distribution"` naming the function.

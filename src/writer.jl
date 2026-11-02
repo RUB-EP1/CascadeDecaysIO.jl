@@ -1,10 +1,14 @@
 const _Appendix = Dict{String,Any}
 
-_half_label(two_j::Integer) = iseven(two_j) ? div(two_j, 2) : two_j / 2
-_complex_string(z::Complex) = replace(string(z), "im" => "i")
-_json_scalar(x) = x isa Complex ? _complex_string(x) : x
-_weight_string(x) = x isa Complex ? _complex_string(x) : string(x)
-_gamma(obj) = getproperty(obj, Symbol(Char(0x0393)))
+# Spins, helicities, l and s are strings in the standard ("0", "1", "1/2", "-3/2")
+_spin_string(two_j::Integer) = iseven(two_j) ? string(div(two_j, 2)) : string(two_j, "/2")
+
+# Complex numbers as "a + bi", matching the ComplexNumber pattern of the schema
+function _complex_string(z::Number)
+    c = ComplexF64(z)
+    return string(real(c), signbit(imag(c)) ? " - " : " + ", abs(imag(c)), "i")
+end
+
 _lambda_a(obj) = getproperty(obj, Symbol("two_", Char(0x03bb), "a"))
 _lambda_b(obj) = getproperty(obj, Symbol("two_", Char(0x03bb), "b"))
 _parity_phase_is_plus(obj) =
@@ -20,31 +24,22 @@ function _normalize_json_value(value)
         return LittleDict{String,Any}(string(k) => _normalize_json_value(v) for (k, v) in value)
     elseif value isa Union{AbstractVector,Tuple}
         return [_normalize_json_value(v) for v in value]
+    elseif value isa Complex
+        return _complex_string(value)
     else
-        return _json_scalar(value)
+        return value
     end
 end
 
-function _write_node_label!(io::IOBuffer, address)
-    if address isa Tuple
-        n = length(address)
-        @inbounds for i in 1:n
-            i > 1 && write(io, '_')
-            _write_node_label!(io, address[i])
-        end
-    else
-        print(io, address)
-    end
-end
-
+# Node label in the m_ij_sq convention: (1,2) -> "12", ((1,2),3) -> "12_3", ((1,2),(3,4)) -> "12_34"
 function _node_label(address)
     address isa Integer && return string(address)
-    io = IOBuffer(sizehint = 16)
-    _write_node_label!(io, address)
-    return String(take!(io))
+    a, b = address
+    (a isa Integer && b isa Integer) && return string(a, b)
+    return string(_node_label(a), "_", _node_label(b))
 end
 
-_mass_variable(address) = "m$(_node_label(address))sq"
+_mass_variable(address) = "m_$(_node_label(address))_sq"
 
 function _line_address(topology::DecayTopology, line_ind::Integer)
     if isfinal_line_ind(topology, line_ind)
@@ -56,356 +51,211 @@ function _line_address(topology::DecayTopology, line_ind::Integer)
     return (_line_address(topology, children[1]), _line_address(topology, children[2]))
 end
 
-function _function_name(prefix, address, payload)
-    return "$(prefix)_$(_node_label(address))_$(nameof(typeof(payload)))"
+# Function types that carry the argument name `x` in the reference models
+const _TYPES_WITH_X = ("BreitWigner", "MultichannelBreitWigner", "Polynomial")
+
+# `x` only labels the argument; a function used on several nodes keeps the `x` of its first use
+_without_x(fn) = filter(kv -> first(kv) != "x", fn)
+
+function _add_function!(appendix::AbstractDict, name::AbstractString, fn::AbstractDict)
+    if haskey(appendix, name)
+        _without_x(appendix[name]) == _without_x(fn) || throw(ArgumentError(
+            "two different functions are named \"$name\"; give them distinct names with NamedLineshape"))
+    else
+        appendix[name] = fn
+    end
+    return appendix
 end
 
-_payload_name(prefix, payload) = "$(prefix)_$(nameof(typeof(payload)))"
-
 function _merge_appendix!(target, source)
-    merge!(target, source)
+    for (name, fn) in source
+        _add_function!(target, name, fn)
+    end
     return target
 end
 
-"""
-    serializeToDict(spins::Union{SystemSpins, SystemSpinParities}; particle_labels=nothing)
+# ---------------------------------------------------------------------------
+# Functions: one method per standard type. Analysis packages extend
+# `serializeToDict` for their own lineshape types (usually as `generic_function`).
+# ---------------------------------------------------------------------------
 
-Serialize external particle quantum numbers (labels, indices, spins) into kinematics dictionary.
-Masses are omitted so they can be provided event-dependently.
 """
-function serializeToDict(
-    spins::Union{SystemSpins, SystemSpinParities};
-    particle_labels = nothing,
-)
-    s = spins isa SystemSpinParities ? spins.spins : spins
-    n_final = length(s.finals)
-    labels = isnothing(particle_labels) ? vcat(["p$i" for i in 1:n_final], ["X"]) : collect(particle_labels)
-    length(labels) == n_final + 1 ||
-        throw(ArgumentError("particle_labels must contain final-state labels followed by the initial-state label"))
+    serializeToDict(f)
 
-    system_dict = LittleDict{String,Any}(
-        "initial_state" => LittleDict{String,Any}(
-            "name" => labels[end],
-            "index" => 0,
-            "spin" => _half_label(s.two_h0),
-        ),
-        "final_state" => [
-            LittleDict{String,Any}(
-                "name" => labels[i],
-                "index" => i,
-                "spin" => _half_label(s.finals[i]),
-            ) for i in 1:n_final
-        ],
+Fallback for objects without an amplitude-serialization mapping. Lineshapes that
+are not part of CascadeDecays or HadronicLineshapes must be serialized by the package
+that defines them, by adding a method
+
+```julia
+CascadeDecaysIO.serializeToDict(f::MyLineshape) =
+    (LittleDict{String,Any}("type" => "generic_function", "expression" => "..."), Dict{String,Any}())
+```
+
+or be wrapped in a [`GenericFunction`](@ref).
+"""
+serializeToDict(f) = throw(ArgumentError(
+    "no amplitude-serialization mapping for $(typeof(f)); define CascadeDecaysIO.serializeToDict " *
+    "for it (standard type or generic_function) or wrap it in GenericFunction"))
+
+function serializeToDict(lineshape::HadronicLineshapes.BreitWigner)
+    return LittleDict{String,Any}(
+        "type" => "BreitWigner",
+        "mass" => lineshape.m,
+        "width" => lineshape.Γ,
+        "ma" => lineshape.ma,
+        "mb" => lineshape.mb,
+        "l" => lineshape.l,
+        "d" => lineshape.d,
+    ),
+    _Appendix()
+end
+
+_channel_dict(c) = LittleDict{String,Any}(
+    "gsq" => Float64(c.gsq), "ma" => Float64(c.ma), "mb" => Float64(c.mb), "l" => Int(c.l), "d" => Float64(c.d))
+
+function serializeToDict(lineshape::HadronicLineshapes.MultichannelBreitWigner)
+    return LittleDict{String,Any}(
+        "type" => "MultichannelBreitWigner",
+        "mass" => lineshape.m,
+        "channels" => Any[_channel_dict(c) for c in lineshape.channels],
+    ),
+    _Appendix()
+end
+
+# HadronicLineshapes evaluates Flatte as a two-channel MultichannelBreitWigner with l = 0, d = 1
+function serializeToDict(lineshape::HadronicLineshapes.Flatte)
+    channels = (
+        (; gsq = lineshape.gsq1, ma = lineshape.ma1, mb = lineshape.mb1, l = 0, d = 1.0),
+        (; gsq = lineshape.gsq2, ma = lineshape.ma2, mb = lineshape.mb2, l = 0, d = 1.0),
     )
-    return system_dict, _Appendix()
+    return LittleDict{String,Any}(
+        "type" => "MultichannelBreitWigner",
+        "mass" => lineshape.m,
+        "channels" => [_channel_dict(c) for c in channels],
+    ),
+    _Appendix()
 end
 
-serializeToDict(system::CascadeSystem; particle_labels = nothing) =
-    serializeToDict(system.quantum; particle_labels)
-
-"""
-    serializeToDict(lineshape::ConstantLineshape)
-
-Serialize the constant lineshape used by CascadeDecays examples and by
-non-propagating placeholder lines in simple cascade tests.
-"""
 function serializeToDict(lineshape::ConstantLineshape)
-    return LittleDict{String,Any}(
-        "type" => "ConstantLineshape",
-        "value" => _json_scalar(lineshape.value),
-    ),
-    _Appendix()
+    value = lineshape.value
+    iszero(imag(value)) || throw(ArgumentError(
+        "ConstantLineshape($value) has a phase; move the constant into the chain weight"))
+    return LittleDict{String,Any}("type" => "Polynomial", "coefficients" => [Float64(real(value))]), _Appendix()
 end
 
-"""
-    serializeToDict(ff::ThreeBodyDecays.NoFormFactor)
+serializeToDict(p::Polynomials.Polynomial) =
+    (LittleDict{String,Any}("type" => "Polynomial", "coefficients" => Float64.(Polynomials.coeffs(p))), _Appendix())
 
-Serialize the absence of a vertex form factor.
+# expressions read with the Unicode names σ and π are written in ASCII
+serializeToDict(f::GenericFunction) = (
+    LittleDict{String,Any}("type" => "generic_function", "expression" => replace(f.expression, "σ" => "sigma", "π" => "pi")),
+    _Appendix(),
+)
 
-Returns the empty form-factor reference `""` and an empty appendix.
-"""
-function serializeToDict(ff::ThreeBodyDecays.NoFormFactor)
-    return "", _Appendix()
+# --- vertex form factors ---
+
+serializeToDict(ff::ThreeBodyDecays.NoFormFactor) = ("", _Appendix())
+
+serializeToDict(ff::HadronicLineshapes.BlattWeisskopf) = (
+    LittleDict{String,Any}(
+        "type" => "BlattWeisskopf", "l" => HadronicLineshapes.orbital_momentum(ff), "radius" => ff.d),
+    _Appendix(),
+)
+
+serializeToDict(ff::HadronicLineshapes.MomentumPower) = (
+    LittleDict{String,Any}("type" => "MomentumPower", "l" => HadronicLineshapes.orbital_momentum(ff)),
+    _Appendix(),
+)
+
+_formfactor_name(ff::HadronicLineshapes.BlattWeisskopf) = "BlattWeisskopf_l$(HadronicLineshapes.orbital_momentum(ff))"
+_formfactor_name(ff::HadronicLineshapes.MomentumPower) = "MomentumPower_l$(HadronicLineshapes.orbital_momentum(ff))"
+_formfactor_name(ff::NamedLineshape) = ff.name
+_formfactor_name(ff) = "formfactor_$(nameof(typeof(ff)))"
+
+_unwrap(f::NamedLineshape) = f.lineshape
+_unwrap(f) = f
+
+function _serialize_formfactor(ff)
+    ff isa ThreeBodyDecays.NoFormFactor && return "", _Appendix()
+    fn, appendix = serializeToDict(_unwrap(ff))
+    name = _formfactor_name(ff)
+    fn["name"] = name
+    return name, _add_function!(appendix, name, fn)
 end
 
-"""
-    serializeToDict(ff::HadronicLineshapes.BlattWeisskopf)
+# --- vertex recouplings ---
 
-Serialize a HadronicLineshapes Blatt-Weisskopf form factor.
-
-The emitted dictionary contains `"type" => "BlattWeisskopf"`, orbital momentum
-`"l"`, and radius `"radius"`.
-"""
-function serializeToDict(ff::HadronicLineshapes.BlattWeisskopf)
-    return LittleDict{String,Any}(
-        "type" => "BlattWeisskopf",
-        "l" => HadronicLineshapes.orbital_momentum(ff),
-        "radius" => ff.d,
-    ),
-    _Appendix()
-end
-
-"""
-    serializeToDict(ff::HadronicLineshapes.MomentumPower)
-
-Serialize a HadronicLineshapes threshold momentum-power form factor.
-"""
-function serializeToDict(ff::HadronicLineshapes.MomentumPower)
-    return LittleDict{String,Any}(
-        "type" => "MomentumPower",
-        "l" => HadronicLineshapes.orbital_momentum(ff),
-    ),
-    _Appendix()
-end
-
-"""
-    serializeToDict(h::ThreeBodyDecays.RecouplingLS)
-
-Serialize an LS recoupling as a vertex dictionary fragment.
-
-The emitted `"l"` and `"s"` values use ordinary angular-momentum units, not the
-doubled integer convention used internally by `ThreeBodyDecays.jl`.
-"""
 function serializeToDict(h::ThreeBodyDecays.RecouplingLS)
-    l, s = _half_label.(h.two_ls)
+    l, s = _spin_string.(h.two_ls)
     return LittleDict{String,Any}("type" => "ls", "l" => l, "s" => s), _Appendix()
 end
 
-"""
-    serializeToDict(h::ThreeBodyDecays.NoRecoupling)
-
-Serialize a fixed-helicity vertex recoupling.
-"""
 function serializeToDict(h::ThreeBodyDecays.NoRecoupling)
-    helicities = _half_label.((_lambda_a(h), _lambda_b(h)))
-    return LittleDict{String,Any}("type" => "helicity", "helicities" => collect(helicities)), _Appendix()
+    helicities = [_spin_string(_lambda_a(h)), _spin_string(_lambda_b(h))]
+    return LittleDict{String,Any}("type" => "helicity", "helicities" => helicities), _Appendix()
 end
 
-"""
-    serializeToDict(h::ThreeBodyDecays.ParityRecoupling)
-
-Serialize a parity-constrained helicity recoupling.
-"""
 function serializeToDict(h::ThreeBodyDecays.ParityRecoupling)
-    helicities = _half_label.((_lambda_a(h), _lambda_b(h)))
-    parity_factor = _parity_phase_is_plus(h) ? '+' : '-'
+    helicities = [_spin_string(_lambda_a(h)), _spin_string(_lambda_b(h))]
     return LittleDict{String,Any}(
         "type" => "parity",
-        "helicities" => collect(helicities),
-        "parity_factor" => parity_factor,
+        "helicities" => helicities,
+        "parity_factor" => _parity_phase_is_plus(h) ? "+" : "-",
     ),
     _Appendix()
-end
-
-_formfactor_name(ff::HadronicLineshapes.BlattWeisskopf) = "BlattWeisskopf_L$(HadronicLineshapes.orbital_momentum(ff))_d$(ff.d)"
-_formfactor_name(ff) = _payload_name("formfactor", ff)
-
-function _serialize_formfactor(ff)
-    ff_dict, ff_appendix = serializeToDict(ff)
-    ff_dict == "" && return ff_dict, ff_appendix
-
-    name = _formfactor_name(ff)
-    ff_dict["name"] = name
-    return name, _Appendix(name => ff_dict)
 end
 
 """
     serializeToDict(vertex::ThreeBodyDecays.VertexFunction)
 
-Serialize a `ThreeBodyDecays.VertexFunction` into a vertex dictionary fragment.
-
-The returned dictionary contains the recoupling fields and a `"formfactor"`
-reference. Non-trivial form factors are added to the returned appendix and
-referenced by generated name.
+Serialize a vertex: recoupling fields plus a `"formfactor"` reference (`""` when the
+vertex has no form factor). Non-trivial form factors are returned in the appendix.
 """
 function serializeToDict(vertex::ThreeBodyDecays.VertexFunction)
-    formfactor_name, formfactor_appendix = _serialize_formfactor(vertex.ff)
-    recoupling_dict, recoupling_appendix = serializeToDict(vertex.h)
-    vertex_dict = LittleDict{String,Any}("type" => recoupling_dict["type"], "formfactor" => formfactor_name)
+    formfactor_name, appendix = _serialize_formfactor(vertex.ff)
+    recoupling_dict, _ = serializeToDict(vertex.h)
+    vertex_dict = LittleDict{String,Any}("type" => recoupling_dict["type"])
     merge!(vertex_dict, recoupling_dict)
-    appendix = _Appendix()
-    _merge_appendix!(appendix, formfactor_appendix)
-    _merge_appendix!(appendix, recoupling_appendix)
+    vertex_dict["formfactor"] = formfactor_name
     return vertex_dict, appendix
 end
 
-function _serialize_lineshape(lineshape::HadronicLineshapes.BreitWigner, variable_name)
-    return LittleDict{String,Any}(
-        "type" => "BreitWigner",
-        "mass" => lineshape.m,
-        "width" => _gamma(lineshape),
-        "ma" => lineshape.ma,
-        "mb" => lineshape.mb,
-        "l" => lineshape.l,
-        "d" => lineshape.d,
-        "x" => variable_name,
-    ),
-    _Appendix()
-end
-
-function _serialize_multichannel_bw(lineshape, variable_name; type_name = "TFPWAMultichannelBreitWigner")
-    channels = [
-        LittleDict{String,Any}(
-            "gsq" => _json_scalar(channel.gsq),
-            "ma" => channel.ma,
-            "mb" => channel.mb,
-            "l" => channel.l,
-            "d" => channel.d,
-        ) for channel in lineshape.channels
-    ]
-    return LittleDict{String,Any}(
-        "type" => "custom",
-        "subtype" => type_name,
-        "expression" => "BW(sigma, m0, sum(gsq * sigma * 2p/sqrt(sigma) * FF(p)^2) / m0)",
-        "mass" => lineshape.m,
-        "channels" => channels,
-        "x" => variable_name,
-    ),
-    _Appendix()
-end
-
-_serialize_lineshape(lineshape::HadronicLineshapes.MultichannelBreitWigner, variable_name) =
-    _serialize_multichannel_bw(lineshape, variable_name; type_name = "MultichannelBreitWigner")
-
-_serialize_lineshape(lineshape::TFPWAMultichannelBreitWigner, variable_name) =
-    _serialize_multichannel_bw(lineshape, variable_name; type_name = "TFPWAMultichannelBreitWigner")
-
-function _serialize_lineshape(lineshape, variable_name)
-    T = typeof(lineshape)
-    if hasfield(T, :channels) && hasfield(T, :m)
-        is_tfpwa = contains(string(nameof(T)), "TFPWA")
-        return _serialize_multichannel_bw(lineshape, variable_name; type_name = is_tfpwa ? "TFPWAMultichannelBreitWigner" : "MultichannelBreitWigner")
-    end
-    if hasfield(T, :αβ) && hasfield(T, :m0)
-        αβ = lineshape.αβ
-        m0 = lineshape.m0
-        α = real(αβ)
-        β = imag(αβ)
-        expr = "-exp(-(($α) + i*($β)) * ($variable_name - $(m0^2)))"
-        return LittleDict{String,Any}(
-            "type" => "custom",
-            "subtype" => "NRExpLineshape",
-            "expression" => expr,
-            "alpha" => α,
-            "beta" => β,
-            "m0" => m0,
-            "x" => variable_name,
-        ),
-        _Appendix()
-    end
-    if hasfield(T, :expression)
-        return LittleDict{String,Any}(
-            "type" => "custom",
-            "expression" => string(lineshape.expression),
-            "x" => variable_name,
-        ),
-        _Appendix()
-    end
-    throw(ArgumentError("unsupported lineshape type $(typeof(lineshape)) for variable $variable_name"))
-end
-
-_serialize_lineshape(lineshape::NamedLineshape, variable_name) =
-    _serialize_lineshape(lineshape.lineshape, variable_name)
+# --- propagator lineshapes ---
 
 _lineshape_name(lineshape::NamedLineshape, address) = lineshape.name
+_lineshape_name(lineshape, address) = "propagator_$(_node_label(address))_$(nameof(typeof(lineshape)))"
 
-function _lineshape_name(lineshape::ConstantLineshape, address)
-    val = lineshape.value
-    if val == 1.0 + 0.0im || val == 1.0
-        return "constant_one"
-    end
-    c_str = imag(val) == 0 ? string(real(val)) : "$(real(val))_$(imag(val))im"
-    return "constant_$(c_str)"
-end
-
-function _lineshape_name(lineshape::HadronicLineshapes.BreitWigner, address)
-    addr = _node_label(address)
-    m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
-    w_str = replace(string(round(_gamma(lineshape), digits=4)), "." => "p")
-    return "BW_$(addr)_m$(m_str)_w$(w_str)"
-end
-
-function _lineshape_name(lineshape::TFPWAMultichannelBreitWigner, address)
-    addr = _node_label(address)
-    m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
-    return "MultiChannelBW_$(addr)_m$(m_str)"
-end
-
-function _lineshape_name(lineshape, address)
-    T = typeof(lineshape)
-    if hasfield(T, :name) && !isempty(getfield(lineshape, :name))
-        return string(getfield(lineshape, :name))
-    end
-    addr = _node_label(address)
-    if hasfield(T, :channels) && hasfield(T, :m)
-        m_str = replace(string(round(lineshape.m, digits=4)), "." => "p")
-        return "MultiChannelBW_$(addr)_m$(m_str)"
-    elseif hasfield(T, :αβ) && hasfield(T, :m0)
-        m0_str = replace(string(round(lineshape.m0, digits=4)), "." => "p")
-        return "NRExp_$(addr)_m0$(m0_str)"
-    end
-    return _function_name("propagator", address, lineshape)
-end
-
-function _serialize_named_lineshape(lineshape, address; name = nothing)
+function _serialize_lineshape(lineshape, address; name = nothing)
+    fn, appendix = serializeToDict(_unwrap(lineshape))
+    fn["type"] in _TYPES_WITH_X && (fn["x"] = _mass_variable(address))
     prop_name = isnothing(name) ? _lineshape_name(lineshape, address) : string(name)
-    inner = lineshape isa NamedLineshape ? lineshape.lineshape : lineshape
-    if inner isa ConstantLineshape
-        fn_dict, appendix = serializeToDict(inner)
-    else
-        fn_dict, appendix = _serialize_lineshape(inner, _mass_variable(address))
-    end
-    fn_dict["name"] = prop_name
-    return prop_name, fn_dict, appendix
+    fn["name"] = prop_name
+    return prop_name, _add_function!(appendix, prop_name, fn)
 end
 
 function _json_topology(topology::DecayTopology)
     return _json_node(_line_address(topology, root_line_ind(topology)))
 end
 
-function _json_topology(topology)
-    return _json_node(topology)
-end
+_json_topology(topology) = _json_node(topology)
 
-function _serialize_propagator(topology::DecayTopology, lineshape, two_j::Integer, line_ind::Integer; name = nothing)
-    address = _line_address(topology, line_ind)
-    prop_name, fn_dict, appendix = _serialize_named_lineshape(lineshape, address; name)
-    prop_dict = LittleDict{String,Any}(
-        "node" => _json_node(address),
-        "spin" => _half_label(two_j),
-        "parametrization" => prop_name,
-    )
-    return prop_dict, prop_name => fn_dict, appendix
-end
-
-function _serialize_vertex(topology::DecayTopology, vertex, vertex_ind::Integer)
-    address = _line_address(topology, incoming_line_ind(topology, vertex_ind))
-    vertex_dict, appendix = serializeToDict(vertex)
-    vertex_dict["node"] = _json_node(address)
-    return vertex_dict, appendix
+function _propagator_name(propagator_names, i, topology, line_ind)
+    isnothing(propagator_names) && return nothing
+    if propagator_names isa AbstractVector || propagator_names isa Tuple
+        return (1 <= i <= length(propagator_names)) ? propagator_names[i] : nothing
+    elseif propagator_names isa AbstractDict
+        address = _line_address(topology, line_ind)
+        return get(propagator_names, address, get(propagator_names, line_ind, nothing))
+    end
+    return string(propagator_names)
 end
 
 """
-    serializeToDict(chain::DecayChain; name="cascade_chain")
+    serializeToDict(chain::DecayChain; name="cascade_chain", propagator_names=nothing)
 
-Serialize one concrete CascadeDecays chain using the same chain fields as
-ThreeBodyDecaysIO, generalized to all internal propagator lines and all binary
-vertices of the cascade topology.
-
-Returns `(chain_dict, appendix)`.
-
-The `chain_dict` contains:
-
-- `"name"`: the chain name.
-- `"topology"`: nested array representation of the cascade topology.
-- `"propagators"`: one entry for each internal line.
-- `"vertices"`: one entry for each binary decay vertex.
-
-The `appendix` contains named function dictionaries referenced by propagators
-and non-trivial form factors.
-
-This method writes dictionaries only. It does not write JSON files and it does
-not provide read-back support.
+Serialize one chain: `"name"`, `"topology"`, one `"propagators"` entry per internal
+line and one `"vertices"` entry per binary vertex. Returns `(chain_dict, appendix)`
+where `appendix` maps function names to their definitions.
 """
 function serializeToDict(
     chain::DecayChain;
@@ -414,108 +264,101 @@ function serializeToDict(
 )
     appendix = _Appendix()
     topology = chain.topology
-
-    props = chain.propagators
     two_js = propagator_two_js(chain)
     line_inds = propagating_line_inds(chain)
-    n_props = length(props)
-    propagator_entries = Vector{LittleDict{String,Any}}(undef, n_props)
 
-    @inbounds for i in 1:n_props
-        lineshape = props[i]
-        two_j = two_js[i]
+    propagators = map(eachindex(chain.propagators)) do i
         line_ind = line_inds[i]
-        p_name = if !isnothing(propagator_names)
-            if propagator_names isa AbstractVector || propagator_names isa Tuple
-                (1 <= i <= length(propagator_names)) ? propagator_names[i] : nothing
-            elseif propagator_names isa AbstractDict
-                addr = _line_address(topology, line_ind)
-                get(propagator_names, addr, get(propagator_names, line_ind, nothing))
-            else
-                string(propagator_names)
-            end
-        else
-            nothing
-        end
-        prop_dict, fn_pair, fn_appendix = _serialize_propagator(topology, lineshape, two_j, line_ind; name = p_name)
+        address = _line_address(topology, line_ind)
+        prop_name, fn_appendix = _serialize_lineshape(chain.propagators[i], address;
+            name = _propagator_name(propagator_names, i, topology, line_ind))
         _merge_appendix!(appendix, fn_appendix)
-        appendix[fn_pair.first] = fn_pair.second
-        propagator_entries[i] = prop_dict
+        LittleDict{String,Any}(
+            "node" => _json_node(address),
+            "spin" => _spin_string(two_js[i]),
+            "parametrization" => prop_name,
+        )
     end
 
-    n_verts = nvertices(chain)
-    vertex_entries = Vector{LittleDict{String,Any}}(undef, n_verts)
-    @inbounds for vertex_ind in 1:n_verts
-        vertex_dict, vertex_appendix = _serialize_vertex(topology, chain.vertices[vertex_ind], vertex_ind)
+    vertices = map(1:nvertices(chain)) do vertex_ind
+        vertex_dict, vertex_appendix = serializeToDict(chain.vertices[vertex_ind])
         _merge_appendix!(appendix, vertex_appendix)
-        vertex_entries[vertex_ind] = vertex_dict
+        vertex_dict["node"] = _json_node(_line_address(topology, incoming_line_ind(topology, vertex_ind)))
+        vertex_dict
     end
 
     chain_dict = LittleDict{String,Any}(
-        "vertices" => vertex_entries,
-        "propagators" => propagator_entries,
-        "topology" => _json_topology(topology),
         "name" => name,
+        "topology" => _json_topology(topology),
+        "propagators" => collect(propagators),
+        "vertices" => collect(vertices),
     )
     return chain_dict, appendix
 end
 
+# ---------------------------------------------------------------------------
+# Kinematics and decay description
+# ---------------------------------------------------------------------------
 
-function _chain_name_weight_model(entry)
-    name, payload = entry
-    weight, chain = payload
-    return string(name), weight, chain
+"""
+    serializeToDict(system::CascadeSystem; particle_labels=nothing)
+
+Serialize the external particles: name, index (0 for the decaying particle), spin
+and mass. Returns `(kinematics, appendix)`.
+"""
+function serializeToDict(system::CascadeSystem; particle_labels = nothing)
+    spins = system.quantum isa SystemSpinParities ? system.quantum.spins : system.quantum
+    n_final = length(spins.finals)
+    labels = isnothing(particle_labels) ? vcat(["p$i" for i in 1:n_final], ["X"]) : collect(particle_labels)
+    length(labels) == n_final + 1 ||
+        throw(ArgumentError("particle_labels must contain final-state labels followed by the initial-state label"))
+
+    kinematics = LittleDict{String,Any}(
+        "initial_state" => LittleDict{String,Any}(
+            "index" => 0,
+            "name" => labels[end],
+            "spin" => _spin_string(spins.two_h0),
+            "mass" => root_mass(system),
+        ),
+        "final_state" => [
+            LittleDict{String,Any}(
+                "index" => i,
+                "name" => labels[i],
+                "spin" => _spin_string(spins.finals[i]),
+                "mass" => final_masses(system)[i],
+            ) for i in 1:n_final
+        ],
+    )
+    return kinematics, _Appendix()
 end
 
+serializeToDict(::Union{SystemSpins, SystemSpinParities}; kwargs...) = throw(ArgumentError(
+    "the amplitude-serialization standard requires masses: use CascadeSystem(spins, SystemMasses(...))"))
+
 """
-    serializeToDict(system::CascadeSystem, weighted_chains; particle_labels=nothing, reference_topology=nothing)
+    serializeToDict(system::CascadeSystem, weighted_chains; particle_labels, reference_topology, propagator_names)
 
-Serialize a weighted list of CascadeDecays chains into a decay-description
-dictionary. `weighted_chains` should be an iterable of
-`name => (weight, chain)` pairs.
-
-Returns `(decay_description, appendix)`.
-
-The `decay_description` contains `"kinematics"`, `"reference_topology"`, and
-`"chains"`. Each chain weight is emitted as a string to match the
-`ThreeBodyDecaysIO.jl` style for complex coefficients.
-
-# Keyword Arguments
-
-- `particle_labels`: optional final-state labels followed by the initial-state
-  label.
-- `reference_topology`: optional topology override. This may be a
-  `DecayTopology` or a nested tuple/array node such as `(((1, 2), 3), 4)`.
+Serialize `name => (weight, chain)` pairs into a decay description with
+`"kinematics"`, `"reference_topology"` and `"chains"`. Returns
+`(decay_description, appendix)`.
 """
 function serializeToDict(
-    spins::Union{SystemSpins, SystemSpinParities},
+    system::CascadeSystem,
     weighted_chains;
     particle_labels = nothing,
     reference_topology = nothing,
     propagator_names = nothing,
 )
-    appendix = _Appendix()
-    kinematics, kin_appendix = serializeToDict(spins; particle_labels)
-    _merge_appendix!(appendix, kin_appendix)
-
-    chain_entries = map(weighted_chains) do entry
-        name, weight, chain = _chain_name_weight_model(entry)
-        chain_p_names = if !isnothing(propagator_names) && propagator_names isa AbstractDict
-            get(propagator_names, name, propagator_names)
-        else
-            propagator_names
-        end
-        chain_dict, chain_appendix = serializeToDict(chain; name, propagator_names = chain_p_names)
+    kinematics, appendix = serializeToDict(system; particle_labels)
+    chains = map(collect(weighted_chains)) do (name, (weight, chain))
+        chain_names = propagator_names isa AbstractDict ? get(propagator_names, string(name), propagator_names) : propagator_names
+        chain_dict, chain_appendix = serializeToDict(chain; name = string(name), propagator_names = chain_names)
         _merge_appendix!(appendix, chain_appendix)
-        chain_dict["weight"] = _weight_string(weight)
+        chain_dict["weight"] = _complex_string(weight)
         chain_dict
     end
-
-    chains = collect(chain_entries)
     isempty(chains) && throw(ArgumentError("weighted_chains must not be empty"))
-    topology =
-        isnothing(reference_topology) ? chains[1]["topology"] : _json_topology(reference_topology)
-
+    topology = isnothing(reference_topology) ? chains[1]["topology"] : _json_topology(reference_topology)
     decay_description = LittleDict{String,Any}(
         "kinematics" => kinematics,
         "reference_topology" => topology,
@@ -523,9 +366,6 @@ function serializeToDict(
     )
     return decay_description, appendix
 end
-
-serializeToDict(system::CascadeSystem, weighted_chains; kwargs...) =
-    serializeToDict(system.quantum, weighted_chains; kwargs...)
 
 function _cascade_spins_and_chains(cascade::CascadeDecay)
     first_chain = first(cascade.chains)
@@ -542,87 +382,117 @@ function _cascade_spins_and_chains(cascade::CascadeDecay)
 end
 
 """
-    serializeToDict(cascade::CascadeDecay; particle_labels=nothing, reference_topology=nothing, propagator_names=nothing)
+    serializeToDict(cascade::CascadeDecay, masses::SystemMasses; particle_labels, reference_topology, propagator_names)
 
-Serialize a concrete `CascadeDecay` to a decay-description dictionary.
+Serialize a `CascadeDecay` to a decay description.
 """
-function serializeToDict(
-    cascade::CascadeDecay;
-    masses = nothing,
-    particle_labels = nothing,
-    reference_topology = nothing,
-    propagator_names = nothing,
-)
-    spins, weighted_chains = _cascade_spins_and_chains(cascade)
-    ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
-    return serializeToDict(spins, weighted_chains; particle_labels, reference_topology = ref_top, propagator_names)
-end
-
-
 function serializeToDict(
     cascade::CascadeDecay,
     masses::SystemMasses;
+    reference_topology = nothing,
+    kwargs...,
+)
+    spins, weighted_chains = _cascade_spins_and_chains(cascade)
+    reference = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
+    return serializeToDict(CascadeSystem(spins, masses), weighted_chains; reference_topology = reference, kwargs...)
+end
+
+# ---------------------------------------------------------------------------
+# Document
+# ---------------------------------------------------------------------------
+
+_appendix_functions(appendix) = [appendix[name] for name in sort!(collect(keys(appendix)))]
+
+"""
+    phaseSpaceDomain(masses::SystemMasses; name="default")
+
+`phase_space` domain of the decay: initial-state mass `m0` and the final-state
+masses in index order.
+"""
+phaseSpaceDomain(masses::SystemMasses; name::AbstractString = "default") = LittleDict{String,Any}(
+    "name" => name,
+    "type" => "phase_space",
+    "m0" => masses.m0,
+    "final_state_masses" => collect(masses.finals),
+)
+
+"""
+    amplitudeSerializationDict(system::CascadeSystem, weighted_chains; kwargs...)
+    amplitudeSerializationDict(cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+
+Build a complete amplitude-serialization document with the five sections the
+standard requires: `distributions`, `functions`, `domains`, `misc` and
+`parameter_points`.
+
+# Keyword arguments
+- `name`, `distribution_type`: name and type of the distribution.
+- `particle_labels`: final-state labels followed by the initial-state label.
+- `reference_topology`, `propagator_names`: see [`serializeToDict`](@ref).
+- `domains`: defaults to the `phase_space` domain of the masses.
+- `validation`: output of [`validationSection`](@ref); adds the four-vector points
+  to `parameter_points` and the checksums to `misc.amplitude_model_checksums`. For a
+  `cascade` the default `:generate` writes three validation points from
+  `validationSection(cascade, masses)`; a model that is non-zero only at a fixed node
+  mass needs `validation = validationSection(cascade, masses; distribution = name,
+  node_masses)`. `nothing` writes no validation points.
+"""
+function amplitudeSerializationDict(
+    system::CascadeSystem,
+    weighted_chains;
     particle_labels = nothing,
     reference_topology = nothing,
+    propagator_names = nothing,
+    name::AbstractString = "cascade_model",
+    distribution_type::AbstractString = "HadronicUnpolarizedIntensity",
+    domains = [phaseSpaceDomain(system.masses)],
+    validation = nothing,
 )
-    return serializeToDict(cascade; masses, particle_labels, reference_topology)
-end
-
-function _as_vector(value)
-    value isa AbstractVector && return value
-    return [value]
-end
-
-function _named_function_dict(name, payload)
-    fn = _normalize_json_value(payload)
-    fn["name"] = get(fn, "name", name)
-    return fn
-end
-
-function _appendix_functions(appendix)
-    names = sort!(collect(keys(appendix)); by = string)
-    return [_named_function_dict(string(name), appendix[name]) for name in names]
-end
-
-function _default_distribution(decay_description; name, type, variables)
-    distribution = LittleDict{String,Any}(
-        "type" => type,
-        "name" => name,
-        "decay_description" => decay_description,
+    decay_description, appendix = serializeToDict(
+        system, weighted_chains; particle_labels, reference_topology, propagator_names)
+    document = LittleDict{String,Any}(
+        "distributions" => [LittleDict{String,Any}(
+            "name" => name,
+            "type" => distribution_type,
+            "decay_description" => decay_description,
+        )],
+        "functions" => _appendix_functions(appendix),
+        "domains" => _normalize_json_value(collect(domains)),
+        "misc" => LittleDict{String,Any}("amplitude_model_checksums" => Any[]),
+        "parameter_points" => Any[],
     )
-    isnothing(variables) || (distribution["variables"] = variables)
-    return distribution
+    isnothing(validation) || setValidation!(document, validation)
+    return document
 end
 
-function _selected_distribution(document, distribution_index)
-    haskey(document, "distributions") ||
-        throw(ArgumentError("document has no distributions section"))
-    distributions = document["distributions"]
-    1 <= distribution_index <= length(distributions) ||
-        throw(ArgumentError("distribution_index $distribution_index is outside the distributions section"))
-    return distributions[distribution_index]
+function amplitudeSerializationDict(
+    cascade::CascadeDecay,
+    masses::SystemMasses;
+    reference_topology = nothing,
+    name::AbstractString = "cascade_model",
+    validation = :generate,
+    kwargs...,
+)
+    spins, weighted_chains = _cascade_spins_and_chains(cascade)
+    reference = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
+    generate = validation === :generate
+    document = amplitudeSerializationDict(CascadeSystem(spins, masses), weighted_chains;
+        reference_topology = reference, name, validation = generate ? nothing : validation, kwargs...)
+    generate && setValidation!(document, validationSection(cascade, masses; distribution = name))
+    return document
 end
 
-function _merge_parameter_points(existing, incoming)
-    isnothing(existing) && return incoming
-    if existing isa AbstractVector && incoming isa AbstractVector
-        return vcat(existing, incoming)
-    elseif existing isa AbstractDict && incoming isa AbstractDict
-        merged = LittleDict{String,Any}(existing)
-        merge!(merged, incoming)
-        return merged
-    end
-    throw(ArgumentError("cannot merge validation parameter_points with an existing incompatible parameter_points section"))
-end
+amplitudeSerializationDict(::CascadeDecay; kwargs...) = throw(ArgumentError(
+    "the amplitude-serialization standard requires masses: amplitudeSerializationDict(cascade, SystemMasses(...))"))
+
+# ---------------------------------------------------------------------------
+# Section setters
+# ---------------------------------------------------------------------------
 
 """
     setSection!(document, section, value)
 
-Set or replace a top-level amplitude-serialization section in `document`.
-
-This generic setter is intentionally permissive so that new schema sections can
-be added without changing the writer. Prefer the more specific setters for
-standard sections when available.
+Set or replace a top-level section. The standard allows only `distributions`,
+`functions`, `domains`, `misc` and `parameter_points`.
 """
 function setSection!(document::AbstractDict, section::AbstractString, value)
     document[section] = _normalize_json_value(value)
@@ -632,66 +502,61 @@ end
 """
     setDistributions!(document, distributions)
 
-Set the top-level `"distributions"` section. A single distribution dictionary is
-accepted and wrapped in a one-element vector.
+Set the `distributions` section; a single distribution is wrapped in a vector.
 """
 function setDistributions!(document::AbstractDict, distributions)
-    document["distributions"] = _normalize_json_value(_as_vector(distributions))
+    document["distributions"] = _normalize_json_value(distributions isa AbstractVector ? distributions : [distributions])
     return document
 end
 
 """
     setFunctions!(document, functions_or_appendix)
 
-Set the top-level `"functions"` section.
-
-If `functions_or_appendix` is a dictionary keyed by function name, it is
-converted to the amplitude-serialization list form. Entries without a `"name"`
-field receive their dictionary key as the name. If a vector is supplied, it is
-used directly.
+Set the `functions` section from a list of function dictionaries or from an appendix
+keyed by function name.
 """
 function setFunctions!(document::AbstractDict, functions_or_appendix)
-    functions =
-        if functions_or_appendix isa AbstractVector
-            _normalize_json_value(functions_or_appendix)
-        else
-            _appendix_functions(functions_or_appendix)
-        end
-    document["functions"] = functions
+    document["functions"] = functions_or_appendix isa AbstractVector ?
+        _normalize_json_value(functions_or_appendix) :
+        _appendix_functions(LittleDict{String,Any}(string(k) => merge(_normalize_json_value(v), Dict("name" => string(k)))
+            for (k, v) in functions_or_appendix))
     return document
 end
 
 """
     appendFunction!(document, name, function_dict)
 
-Append one named function to the top-level `"functions"` section.
-
-The function dictionary is copied before insertion. If it does not already
-contain a `"name"` field, `name` is inserted.
+Append one function definition; it is an error if a different function of the same
+name already exists.
 """
 function appendFunction!(document::AbstractDict, name::AbstractString, function_dict)
     functions = get!(document, "functions", Any[])
-    push!(functions, _named_function_dict(name, function_dict))
+    fn = _normalize_json_value(function_dict)
+    fn["name"] = name
+    existing = findfirst(f -> f["name"] == name, functions)
+    if isnothing(existing)
+        push!(functions, fn)
+    elseif functions[existing] != fn
+        throw(ArgumentError("two different functions are named \"$name\""))
+    end
     return document
 end
 
 """
     setDomains!(document, domains)
 
-Set the top-level `"domains"` section. The writer does not infer physical
-boundaries automatically; callers should pass the domain definitions used by
-their analysis.
+Set the `domains` section, e.g. `[phaseSpaceDomain(masses)]`.
 """
 function setDomains!(document::AbstractDict, domains)
-    document["domains"] = _normalize_json_value(domains)
+    document["domains"] = _normalize_json_value(collect(domains))
     return document
 end
 
 """
     setMisc!(document, misc)
 
-Set the top-level `"misc"` section for free-form metadata such as software
-versions, analysis labels, or checksums.
+Replace the `misc` section. The reference models keep only
+`amplitude_model_checksums` there.
 """
 function setMisc!(document::AbstractDict, misc)
     document["misc"] = _normalize_json_value(misc)
@@ -701,222 +566,62 @@ end
 """
     setParameterPoints!(document, parameter_points)
 
-Set the top-level `"parameter_points"` section. This is where named numerical
-parameter sets can be stored when they are available independently of the model
-structure.
+Replace the `parameter_points` section.
 """
 function setParameterPoints!(document::AbstractDict, parameter_points)
-    document["parameter_points"] = _normalize_json_value(parameter_points)
-    return document
-end
-
-"""
-    setVariables!(document, variables; distribution_index=1)
-
-Set `"variables"` on one distribution entry.
-
-Variables belong to a concrete distribution rather than to the top-level
-document, so this setter modifies `document["distributions"][distribution_index]`.
-"""
-function setVariables!(
-    document::AbstractDict,
-    variables;
-    distribution_index::Integer = 1,
-)
-    distribution = _selected_distribution(document, distribution_index)
-    distribution["variables"] = _normalize_json_value(variables)
+    document["parameter_points"] = _normalize_json_value(collect(parameter_points))
     return document
 end
 
 """
     setValidation!(document, validation)
 
-Insert a ThreeBodyDecaysIO-style validation bundle into `document`.
-
-The expected shape is a dictionary that may contain `"misc"` and
-`"parameter_points"`, as returned by ThreeBodyDecaysIO's `validation_section`.
-`"misc"` is merged with the document's top-level `"misc"` section, and
-`"parameter_points"` replaces the top-level `"parameter_points"` section.
-
-For convenience, a dictionary containing `"amplitude_model_checksums"` directly
-is treated as the `"misc"` payload.
+Add the output of [`validationSection`](@ref): its `parameter_points` are appended to
+the `parameter_points` section and its `checksums` to
+`misc.amplitude_model_checksums`.
 """
 function setValidation!(document::AbstractDict, validation)
-    validation_dict = _normalize_json_value(validation)
-
-    if haskey(validation_dict, "misc")
-        misc = get(document, "misc", LittleDict{String,Any}())
-        merge!(misc, validation_dict["misc"])
-        document["misc"] = misc
-    elseif haskey(validation_dict, "amplitude_model_checksums")
-        misc = get(document, "misc", LittleDict{String,Any}())
-        misc["amplitude_model_checksums"] = validation_dict["amplitude_model_checksums"]
-        document["misc"] = misc
-    end
-
-    if haskey(validation_dict, "parameter_points")
-        existing_points = get(document, "parameter_points", nothing)
-        document["parameter_points"] = _merge_parameter_points(existing_points, validation_dict["parameter_points"])
-    end
-
-    (haskey(validation_dict, "misc") ||
-     haskey(validation_dict, "amplitude_model_checksums") ||
-     haskey(validation_dict, "parameter_points")) ||
-        throw(ArgumentError("validation must contain misc, amplitude_model_checksums, or parameter_points"))
-
+    points = get!(document, "parameter_points", Any[])
+    append!(points, _normalize_json_value(validation.parameter_points))
+    misc = get!(document, "misc", LittleDict{String,Any}())
+    checksums = get!(misc, "amplitude_model_checksums", Any[])
+    append!(checksums, _normalize_json_value(validation.checksums))
     return document
 end
 
-"""
-    amplitudeSerializationDict(
-        system::CascadeSystem,
-        weighted_chains;
-        particle_labels=nothing,
-        reference_topology=nothing,
-        name="cascade_model",
-        distribution_type="HadronicUnpolarizedIntensity",
-        variables=nothing,
-        domains=nothing,
-        misc=nothing,
-        parameter_points=nothing,
-        validation=nothing,
-    )
-
-Build a complete amplitude-serialization-style JSON dictionary from a
-`CascadeSystem` and weighted `DecayChain` collection.
-
-This is the document-level wrapper around `serializeToDict`. It creates the
-standard `"distributions"` section, converts the collected appendix into the
-top-level `"functions"` list, and inserts optional sections when keyword values
-are provided.
-
-# Keyword Placement
-
-- `variables`: attached to the generated distribution.
-- `validation`: merged into top-level `"misc"` and `"parameter_points"`.
-- `domains`: written as the top-level `"domains"` section.
-- `misc`: written as the top-level `"misc"` section.
-- `parameter_points`: written as the top-level `"parameter_points"` section.
-"""
-function amplitudeSerializationDict(
-    spins::Union{SystemSpins, SystemSpinParities, CascadeSystem},
-    weighted_chains;
-    particle_labels = nothing,
-    reference_topology = nothing,
-    name::AbstractString = "cascade_model",
-    distribution_type::AbstractString = "HadronicUnpolarizedIntensity",
-    variables = nothing,
-    domains = nothing,
-    misc = nothing,
-    parameter_points = nothing,
-    validation = nothing,
-    propagator_names = nothing,
-)
-    decay_description, appendix = serializeToDict(
-        spins,
-        weighted_chains;
-        particle_labels,
-        reference_topology,
-        propagator_names,
-    )
-
-    document = LittleDict{String,Any}(
-        "distributions" => [
-            _default_distribution(
-                decay_description;
-                name,
-                type = distribution_type,
-                variables,
-            ),
-        ],
-        "functions" => _appendix_functions(appendix),
-    )
-    isnothing(domains) || setDomains!(document, domains)
-    isnothing(misc) || setMisc!(document, misc)
-    isnothing(parameter_points) || setParameterPoints!(document, parameter_points)
-    isnothing(validation) || setValidation!(document, validation)
-    return document
-end
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
 
 """
-    writeJson(path, document; indent=4)
+    writeJson(path, document; indent=4, ascii_only=true)
 
-Write an amplitude-serialization dictionary to `path` as formatted JSON and
-return `path`.
+Write an amplitude-serialization document to `path` and return `path`. With
+`ascii_only` (default) the file must not contain non-ASCII characters, so that
+readers in any language can parse names and expressions without Unicode handling.
 """
-function writeJson(path::AbstractString, document::AbstractDict; indent::Integer = 4)
+function writeJson(path::AbstractString, document::AbstractDict; indent::Integer = 4, ascii_only::Bool = true)
+    text = sprint(io -> JSON.print(io, document, indent))
+    if ascii_only && !isascii(text)
+        offending = unique(filter(!isascii, collect(text)))
+        throw(ArgumentError("document contains non-ASCII characters $(join(offending, " ")); " *
+            "rename them or pass ascii_only = false"))
+    end
     open(path, "w") do io
-        JSON.print(io, document, indent)
+        print(io, text)
         println(io)
     end
     return path
 end
 
 """
-    writeJson(path, system::Union{CascadeSystem, SystemSpins}, weighted_chains; kwargs...)
+    writeJson(path, cascade::CascadeDecay, masses::SystemMasses; kwargs...)
+    writeJson(path, system::CascadeSystem, weighted_chains; kwargs...)
 
-Build a complete amplitude-serialization dictionary with
-`amplitudeSerializationDict(system, weighted_chains; kwargs...)`, write it to
-`path`, and return `path`.
+Build the document with [`amplitudeSerializationDict`](@ref) and write it.
 """
-function writeJson(
-    path::AbstractString,
-    system::Union{CascadeSystem, SystemSpins},
-    weighted_chains;
-    kwargs...,
-)
-    return writeJson(path, amplitudeSerializationDict(system, weighted_chains; kwargs...))
-end
+writeJson(path::AbstractString, cascade::CascadeDecay, masses::SystemMasses; indent::Integer = 4, ascii_only::Bool = true, kwargs...) =
+    writeJson(path, amplitudeSerializationDict(cascade, masses; kwargs...); indent, ascii_only)
 
-"""
-    amplitudeSerializationDict(cascade::CascadeDecay; kwargs...)
-
-Build a complete amplitude-serialization dictionary from a `CascadeDecay` container.
-"""
-function amplitudeSerializationDict(
-    cascade::CascadeDecay;
-    masses = nothing,
-    particle_labels = nothing,
-    reference_topology = nothing,
-    kwargs...,
-)
-    spins, weighted_chains = _cascade_spins_and_chains(cascade)
-    ref_top = isnothing(reference_topology) ? cascade.reference_topology : reference_topology
-    return amplitudeSerializationDict(
-        spins,
-        weighted_chains;
-        particle_labels,
-        reference_topology = ref_top,
-        kwargs...,
-    )
-end
-
-function amplitudeSerializationDict(
-    cascade::CascadeDecay,
-    masses::SystemMasses;
-    kwargs...,
-)
-    return amplitudeSerializationDict(cascade; masses, kwargs...)
-end
-
-"""
-    writeJson(path, cascade::CascadeDecay; kwargs...)
-
-Build a complete amplitude-serialization dictionary for `cascade` and write it to `path`.
-"""
-function writeJson(
-    path::AbstractString,
-    cascade::CascadeDecay;
-    kwargs...,
-)
-    return writeJson(path, amplitudeSerializationDict(cascade; kwargs...))
-end
-
-function writeJson(
-    path::AbstractString,
-    cascade::CascadeDecay,
-    masses::SystemMasses;
-    kwargs...,
-)
-    return writeJson(path, cascade; masses, kwargs...)
-end
+writeJson(path::AbstractString, system::CascadeSystem, weighted_chains; indent::Integer = 4, ascii_only::Bool = true, kwargs...) =
+    writeJson(path, amplitudeSerializationDict(system, weighted_chains; kwargs...); indent, ascii_only)
