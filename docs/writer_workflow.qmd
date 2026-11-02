@@ -55,9 +55,9 @@ Validation points are final-state four-vectors in the rest frame of the decaying
 
 ```julia
 validation = validationSection(model, masses; distribution = "model_intensity")
-# a node at fixed mass (e.g. a D* in the narrow-width approximation), point 2 in a mass window
-validation = validationSection(model, masses; distribution = "model_intensity", node_masses = [
-    Dict((1, 2) => 2.01026), Dict((1, 2) => 2.01026, ((1, 2), 3) => (3.88, 3.89)), Dict((1, 2) => 2.01026)])
+# a node at fixed mass (a narrow resonance in the narrow-width approximation)
+validation = validationSection(model, masses; distribution = "model_intensity",
+    node_masses = Dict((1, 2) => m12))
 # given events: tuples of FourVector
 validation = validationSection(model, events; distribution = "model_intensity")
 ```

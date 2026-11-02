@@ -108,14 +108,14 @@ model, system, document = readJson("model.json"; custom_functions = Dict("linesh
 ```julia
 validation = validationSection(model, masses; distribution = "model_intensity")   # generate 3 points
 validation = validationSection(model, masses; distribution = "model_intensity",
-    node_masses = Dict((1, 2) => 2.01026))   # node (1, 2) at a fixed mass, e.g. a D*
+    node_masses = Dict((1, 2) => m12))   # node (1, 2) at a fixed mass m12
 validation = validationSection(model, events; distribution = "model_intensity")   # given events
 results = validate(document)                 # every checksum of every distribution
 results = validate(document, model)          # use `model` for the first distribution
 results = validate("model.json")
 ```
 
-`amplitudeSerializationDict(model, masses; ...)` and `writeJson(path, model, masses; ...)` generate three points with `validationSection(model, masses; distribution = name)` unless `validation` is given (`validation = nothing`: no points). The generator (`validationEvents`, `phaseSpaceEvent`) builds events by successive isotropic two-body decays along the reference topology; internal node masses are uniform between their kinematic limits, or fixed (`node_masses = Dict(node => m)`) or restricted (`node => (lo, hi)`), one dictionary for all events or one per event. An event is accepted if the intensity there is at least `min_relative_intensity` (default `0.1`) times the mean intensity of `pilot` (default `1000`) events drawn the same way; a model that vanishes on all of them, typically because a lineshape is narrower than the sampled mass range, is an error that asks for the node mass. A given event with vanishing intensity is also an error.
+`amplitudeSerializationDict(model, masses; ...)` and `writeJson(path, model, masses; ...)` generate three points with `validationSection(model, masses; distribution = name)` unless `validation` is given (`validation = nothing`: no points). The generator (`validationEvents`, `phaseSpaceEvent`) builds events by successive isotropic two-body decays along the reference topology; internal node masses are uniform between their kinematic limits or fixed (`node_masses = Dict(node => m)`, e.g. a narrow resonance in the narrow-width approximation). An event is accepted if the intensity there is at least `min_relative_intensity` (default `0.1`) times the mean intensity of `pilot` (default `1000`) events drawn the same way; a model that vanishes on all of them, typically because a lineshape is narrower than the sampled mass range, is an error that asks for the node mass. A given event with vanishing intensity is also an error.
 
 Each event becomes a point `{"name", "domain", "four_vectors": [{"index", "E", "px", "py", "pz"}, ...]}` with a checksum `{"point", "distribution", "value"}`, where `value` is the unpolarized intensity `Σ|A|²`. `validate` recomputes every checksum with the distribution it names (or, for a lineshape checksum at a scalar point, the function it names; any other name is an error) and checks that the four-vectors lie on their `phase_space` domain: `|p² − m²|` in GeV² and the total four-momentum `(m0, 0, 0, 0)` in GeV, both within `atol_phase_space` (default `1e-8`). `kinematicTask(model)` returns the `KinematicTask` for evaluating the model on four-vectors.
 

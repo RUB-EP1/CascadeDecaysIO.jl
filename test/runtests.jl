@@ -260,21 +260,20 @@ end
         for topology in (SEQ, PAIRED, (((1, 2), 3), 4), ((3, 1), (4, 2)))
             @test all(on_domain(phaseSpaceEvent(rng, MASSES, topology)) for _ in 1:20)
         end
-        fixed = [phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict((1, 2) => 1.25, ((1, 2), 3) => (3.0, 3.1)))
+        fixed = [phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict((1, 2) => 1.25, ((1, 2), 3) => 3.05))
                  for _ in 1:20]
         @test all(on_domain, fixed)
         @test all(e -> abs(mass(e[1] + e[2]) - 1.25) < 1e-12, fixed)
-        @test all(e -> 3.0 <= mass(e[1] + e[2] + e[3]) <= 3.1, fixed)
+        @test all(e -> abs(mass(e[1] + e[2] + e[3]) - 3.05) < 1e-12, fixed)
         @test_throws ArgumentError phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict((3, 4) => 2.0))
         @test_throws ArgumentError phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict((1, 2) => 1.1))
-        @test_throws ArgumentError phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict(((1, 2), 3) => (3.2, 3.1)))
+        @test_throws ArgumentError phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict(((1, 2), 3) => (3.0, 3.1)))
 
         events = validationEvents(model, MASSES)
         @test length(events) == 3 && all(on_domain, events)
         @test events == validationEvents(model, MASSES)                        # reproducible default seed
         mean = sum(unpolarized_intensity(model, KinematicPoint(task, phaseSpaceEvent(rng, MASSES, SEQ))) for _ in 1:1000) / 1000
         @test all(unpolarized_intensity(model, KinematicPoint(task, e)) > 0.05 * mean for e in events)
-        @test_throws ArgumentError validationEvents(model, MASSES; node_masses = [Dict(), Dict()])
 
         # a particle with fixed mass: the model vanishes off m12 = 1.25
         delta = NamedLineshape("lineshape_delta", GenericFunction("exp(-0.5 * ((sqrt(sigma) - 1.25) / 1.0e-6)^16)"))
@@ -286,9 +285,6 @@ end
         @test all(c -> c["value"] > 0, on_shell.checksums)
         off_shell = phaseSpaceEvent(rng, MASSES, SEQ; node_masses = Dict((1, 2) => 1.26))
         @test_throws ArgumentError validationSection(narrow, [off_shell]; distribution = "narrow")
-        per_event = validationEvents(narrow, MASSES; node_masses = [
-            Dict((1, 2) => 1.25), Dict((1, 2) => 1.25, ((1, 2), 3) => (3.25, 3.35)), Dict((1, 2) => 1.25)])
-        @test 3.25 <= mass(per_event[2][1] + per_event[2][2] + per_event[2][3]) <= 3.35
 
         # written by default when the document is created, and they validate
         doc = amplitudeSerializationDict(narrow, MASSES; name = "narrow",

@@ -39,27 +39,22 @@ _node_tree(tree::Tuple) = tree
 _internal_nodes(::Integer) = ()
 _internal_nodes(node::Tuple) = (node, _internal_nodes(node[1])..., _internal_nodes(node[2])...)
 
-# a node without entry in `node_masses` may take any mass
-_mass_spec(node, node_masses) = get(node_masses, node, (0.0, Inf))
-
 _threshold(node, masses, node_masses) =
     _minimum_mass(node[1], masses, node_masses) + _minimum_mass(node[2], masses, node_masses)
 
-# lowest mass of a node: its fixed mass, or the larger of its lower bound and its threshold
+# lowest mass of a node: its fixed mass or the threshold of its decay products
 function _minimum_mass(node, masses, node_masses)
     node isa Integer && return Float64(masses.finals[node])
-    spec = _mass_spec(node, node_masses)
-    spec isa Real && return Float64(spec)
-    return max(Float64(first(spec)), _threshold(node, masses, node_masses))
+    haskey(node_masses, node) && return Float64(node_masses[node])
+    return _threshold(node, masses, node_masses)
 end
 
 function _check_node_masses(tree, masses, node_masses)
     nodes = (_internal_nodes(tree[1])..., _internal_nodes(tree[2])...)
-    for (node, spec) in node_masses
+    for (node, m) in node_masses
         node in nodes || throw(ArgumentError("node $node is not an internal node of the topology $tree"))
-        valid = spec isa Real || (spec isa Tuple && first(spec) < last(spec))
-        valid && (spec isa Real ? spec : last(spec)) >= _threshold(node, masses, node_masses) || throw(ArgumentError(
-            "mass of node $node must be a number or a range (lo, hi) above the threshold of its decay products, got $spec"))
+        m isa Real && m >= _threshold(node, masses, node_masses) || throw(ArgumentError(
+            "mass of node $node must be a number above the threshold of its decay products, got $m"))
     end
     _threshold(tree, masses, node_masses) <= masses.m0 ||
         throw(ArgumentError("the node masses exceed the initial-state mass $(masses.m0) GeV"))
@@ -69,8 +64,8 @@ end
 # fixed, or uniform between the minimum mass and `upper` (the mass left by the parent)
 function _node_mass(rng, node, upper, masses, node_masses)
     lower = _minimum_mass(node, masses, node_masses)
-    (node isa Integer || _mass_spec(node, node_masses) isa Real) && return lower
-    return lower + (min(upper, last(_mass_spec(node, node_masses))) - lower) * rand(rng)
+    (node isa Integer || haskey(node_masses, node)) && return lower
+    return lower + (upper - lower) * rand(rng)
 end
 
 # `p` from the rest frame of a system of mass `M` into the frame where it has momentum `P`
@@ -101,11 +96,8 @@ One point of the `phase_space` domain of `masses`: the final-state four-vectors,
 index order, in the rest frame of the decaying particle. The event is built by
 successive two-body decays along `topology` (a `DecayTopology` or a nested tuple such
 as `(((1, 2), 3), 4)`); at every vertex the first child is emitted isotropically in the
-rest frame of the parent. The mass of an internal node is
-
-- `node_masses[node]` if that is a number (e.g. a particle with fixed mass),
-- uniform in `node_masses[node] = (lo, hi)`, restricted to the kinematic limits,
-- uniform between its kinematic limits otherwise.
+rest frame of the parent. The mass of an internal node is `node_masses[node]` if given
+(e.g. a particle with fixed mass), otherwise uniform between its kinematic limits.
 
 Nodes are addressed as in the topology, e.g. `(1, 2)` or `((1, 2), 3)`. The events
 serve as validation points; they are not distributed according to phase space.
@@ -126,8 +118,7 @@ end
 `n` events of the phase space of `masses` (see [`phaseSpaceEvent`](@ref)) at which
 `cascade` has a substantial intensity. An event is accepted if the unpolarized
 intensity of `cascade` there is at least `min_relative_intensity` times the mean
-intensity of `pilot` events drawn with the same `node_masses`. `node_masses` is one
-dictionary for all events or a vector with one dictionary per event.
+intensity of `pilot` events drawn the same way.
 
 A model whose intensity vanishes on all pilot events is an error. Its intensity is then
 non-zero only on a part of the phase space the generator does not reach, typically a
@@ -146,19 +137,16 @@ function validationEvents(
     max_tries::Integer = 100_000,
     task = kinematicTask(cascade),
 )
-    specs = node_masses isa AbstractDict ? fill(node_masses, n) : collect(node_masses)
-    length(specs) == n || throw(ArgumentError("node_masses has $(length(specs)) entries for $n events"))
-    draw(spec) = phaseSpaceEvent(rng, masses, topology; node_masses = spec)
+    draw() = phaseSpaceEvent(rng, masses, topology; node_masses)
     intensity(event) = unpolarized_intensity(cascade, KinematicPoint(task, event))
-    scales = Dict{Any,Float64}()
-    return map(specs) do spec
-        scale = get!(() -> sum(intensity(draw(spec)) for _ in 1:pilot) / pilot, scales, spec)
-        scale > 0 && isfinite(scale) || throw(ArgumentError(
-            "mean intensity $scale over $pilot events with node masses $spec: the model is non-zero only " *
-            "where the generator does not sample, e.g. on a lineshape narrower than the sampled mass range; " *
-            "fix that node mass with node_masses = Dict(node => mass)"))
+    scale = sum(intensity(draw()) for _ in 1:pilot) / pilot
+    scale > 0 && isfinite(scale) || throw(ArgumentError(
+        "mean intensity $scale over $pilot events with node masses $node_masses: the model is non-zero only " *
+        "where the generator does not sample, e.g. on a lineshape narrower than the sampled mass range; " *
+        "fix that node mass with node_masses = Dict(node => mass)"))
+    return map(1:n) do _
         for _ in 1:max_tries
-            event = draw(spec)
+            event = draw()
             intensity(event) >= min_relative_intensity * scale && return event
         end
         throw(ArgumentError("no event with intensity >= $(min_relative_intensity) x mean in $max_tries tries"))
