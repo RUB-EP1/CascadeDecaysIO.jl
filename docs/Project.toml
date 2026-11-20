@@ -11,7 +11,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
-CascadeDecays = {url = "https://github.com/RUB-EP1/CascadeDecays.jl.git", rev = "e7241ff15aa1142ac8953fd7f378560ccc9ead46"}
+CascadeDecays = {url = "https://github.com/RUB-EP1/CascadeDecays.jl.git", rev = "9c9c814f9fc300bc12756c4e6b86ac9126e71ab8"}
 CascadeDecaysIO = {path = ".."}
 
 [compat]

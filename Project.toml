@@ -1,7 +1,7 @@
 name = "CascadeDecaysIO"
 uuid = "9d2b3f4d-3b61-4f8e-9b8d-4a0e6f3c8c21"
-version = "0.1.0"
 authors = ["RUB-EP1"]
+version = "0.2.0"
 
 [deps]
 CascadeDecays = "fffe189e-c188-4e56-b22b-870ae3b23d6b"
@@ -15,7 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
-CascadeDecays = {path = "../CascadeDecays.jl"}
+CascadeDecays = {url = "https://github.com/RUB-EP1/CascadeDecays.jl.git", rev = "9c9c814f9fc300bc12756c4e6b86ac9126e71ab8"}
 
 [compat]
 CascadeDecays = "0.5"
@@ -26,12 +26,13 @@ OrderedCollections = "1.6"
 Polynomials = "4"
 Random = "1"
 StaticArrays = "1"
-ThreeBodyDecays = "0.14"
 Test = "1"
+ThreeBodyDecays = "=0.16.0"
 julia = "1.11"
 
 [extras]
+JSONSchema = "7d188eb4-7ad8-530c-ae41-71a32a6d4692"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "JSONSchema"]

@@ -41,7 +41,6 @@ jobs:
           version: "1"
       - name: Use Julia cache
         uses: julia-actions/cache@v2
-      - uses: quarto-dev/quarto-actions/setup@v2
       - name: Instantiate docs environment
         run: |
           julia --project=docs -e '

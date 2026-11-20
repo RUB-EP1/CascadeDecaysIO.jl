@@ -1,0 +1,862 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Amplitude Model Serialization Format",
+  "description": "This schema describes the serialization format of an amplitude model for hadron physics.",
+  "additionalProperties": false,
+  "definitions": {
+    "AngularMomentum": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        }
+      ]
+    },
+    "ComplexNumber": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "pattern": "^-?\\d+(\\.\\d+)?(e[-+]?\\d+)? *[+-] *\\d+(\\.\\d+)?(e[-+]?\\d+)?i$"
+        }
+      ],
+      "examples": [
+        "1",
+        "1.0",
+        "1.0 + 2.0i",
+        "1.0-2.0i"
+      ]
+    },
+    "DecayChain": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "A label for the decay chain, used for clarity and not as a standardized identifier.",
+          "type": "string"
+        },
+        "propagators": {
+          "description": "List of the lineshape descriptors.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "spin": {
+                "$ref": "#/definitions/Spin"
+              },
+              "node": {
+                "description": "Defines a node in the topology graph by specifying the particles involved in the interaction.",
+                "$ref": "#/definitions/Topology"
+              },
+              "parametrization": {
+                "type": "string",
+                "description": "Lineshape parametrization. Should match the \"name\" of one of the function definitions under the \"functions\" section."
+              }
+            },
+            "required": [
+              "spin",
+              "node",
+              "parametrization"
+            ],
+            "additionalProperties": false
+          },
+          "uniqueItems": true
+        },
+        "topology": {
+          "description": "Structure of this decay chain represented as nested particle grouping into intermediate subsystems.",
+          "$ref": "#/definitions/Topology"
+        },
+        "vertices": {
+          "description": "Vertices define the nodes in the decay graphs denoted by grouping of particle indices.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Vertex"
+          },
+          "uniqueItems": true
+        },
+        "weight": {
+          "description": "The weight in each chain gives the complex coefficient that multiplies the decay matrix element of the chain\u2019s specific sequence of interactions and propagations. It influences the probability of the chain\u2019s occurrence and interference with other decay chains. The weight is a complex number.",
+          "$ref": "#/definitions/ComplexNumber"
+        }
+      },
+      "required": [
+        "name",
+        "propagators",
+        "topology",
+        "vertices",
+        "weight"
+      ],
+      "additionalProperties": false
+    },
+    "Function": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "BreitWigner"
+            },
+            "mass": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "width": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "ma": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "mb": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "l": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "d": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "mass",
+            "width",
+            "ma",
+            "mb",
+            "l",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "MultichannelBreitWigner"
+            },
+            "mass": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "channels": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "gsq": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ]
+                  },
+                  "ma": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ]
+                  },
+                  "mb": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ]
+                  },
+                  "l": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ]
+                  },
+                  "d": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "gsq",
+                  "ma",
+                  "mb",
+                  "l",
+                  "d"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "mass",
+            "channels"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "Polynomial"
+            },
+            "coefficients": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "coefficients"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "BlattWeisskopf"
+            },
+            "radius": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            },
+            "l": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "radius",
+            "l"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "MomentumPower"
+            },
+            "l": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "l"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "type": {
+              "const": "expression_function"
+            },
+            "arguments": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              }
+            },
+            "parameters": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                  }
+                ]
+              }
+            },
+            "expression": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10000
+            }
+          },
+          "required": [
+            "name",
+            "type",
+            "arguments",
+            "parameters",
+            "expression"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Spin": {
+      "description": "The spin of the particle, described as a fraction in string format. If the particle is a fermion, the spin is an integer or half-integer. If the particle is a boson, the spin is an integer.",
+      "examples": [
+        "0",
+        "1/2",
+        "1",
+        "-3/2"
+      ],
+      "pattern": "^(?![-+]0)[-+]?\\d+(/2)?$",
+      "type": "string"
+    },
+    "State": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "A unique identifier for each particle, with 0 reserved for the initial state particle.",
+          "minimum": 0
+        },
+        "mass": {
+          "type": "number",
+          "minimum": 0
+        },
+        "name": {
+          "type": "string",
+          "description": "A label for each particle, used for clarity and not as a standardized identifier."
+        },
+        "spin": {
+          "description": "The spin quantum number of the particle, represented in string format",
+          "$ref": "#/definitions/Spin"
+        }
+      },
+      "required": [
+        "index",
+        "name",
+        "spin",
+        "mass"
+      ],
+      "additionalProperties": false
+    },
+    "Topology": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "$ref": "#/definitions/Topology"
+          }
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "Vertex": {
+      "type": "object",
+      "required": [
+        "type",
+        "node",
+        "formfactor"
+      ],
+      "properties": {
+        "type": {
+          "description": "Specifies how the helicity recoupling factor H_{lam1,lam2} is computed. Each option reflects different ways of relating combinations of the helicity indices to a real-valued factor, the recoupling coefficient.",
+          "enum": [
+            "helicity",
+            "ls",
+            "parity"
+          ],
+          "enumDescriptions": [
+            "Recoupling with LS computes the value of the recoupling functions using Clebsch-Gordan coefficients.",
+            "Parity` recoupling is controlled by the parity factor and gives a non-zero value for two combination of the helicity pair, the selected one and the opposite.",
+            "No recoupling. The factor is 1 for a pair of selected helicities and zero for other combinations."
+          ]
+        },
+        "helicities": {
+          "type": "array",
+          "description": "Spin projections of the two decay products in the vertex.",
+          "items": {
+            "$ref": "#/definitions/Spin"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "node": {
+          "$ref": "#/definitions/Topology",
+          "description": "Description of the position of the vertex within the decay topology."
+        },
+        "parity_factor": {
+          "description": "Factor that is is required for parity couplings and LS couplings. Gives a non-zero value for two combination of the helicity pair, the selected one and the opposite.",
+          "enum": [
+            "-",
+            "+"
+          ]
+        },
+        "l": {
+          "description": "Orbital angular momentum of particles in the decay the vertex.",
+          "$ref": "#/definitions/AngularMomentum"
+        },
+        "s": {
+          "description": "Coupled spin of the vertex.",
+          "$ref": "#/definitions/Spin"
+        },
+        "formfactor": {
+          "description": "Optional form-factor for the vertex. The form-factor is a function of three arguments, (mX^2, mA^2, mB^2) for X->[A,B] vertex, that is defined under \"functions\" section.",
+          "default": "",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "helicity"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "helicities"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ls"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "l",
+              "s"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "parity"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "helicities",
+              "parity_factor"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "distributions": {
+      "type": "array",
+      "description": "List of amplitude model PDF descriptions.",
+      "items": {
+        "properties": {
+          "decay_description": {
+            "type": "object",
+            "description": "Description of the decay that underlies the PDF.",
+            "properties": {
+              "chains": {
+                "type": "array",
+                "description": "List with definitions of the decay chains and their corresponding amplitudes that contribute to the PDF.",
+                "items": {
+                  "$ref": "#/definitions/DecayChain"
+                },
+                "minItems": 1
+              },
+              "kinematics": {
+                "type": "object",
+                "description": "Definition of the initial and final state of the decay.",
+                "properties": {
+                  "initial_state": {
+                    "description": "Initial state of the decay.",
+                    "$ref": "#/definitions/State"
+                  },
+                  "final_state": {
+                    "type": "array",
+                    "description": "List of states that form the final state.",
+                    "items": {
+                      "$ref": "#/definitions/State"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "initial_state",
+                  "final_state"
+                ]
+              },
+              "reference_topology": {
+                "$ref": "#/definitions/Topology",
+                "description": "Definition of the basic decay structure (topology) of the model, which is used to define 1) parametrization of the decay kinematics, and 2) reference quantization axes. It outlines the decay chain for which the amplitude is written without a need for the alignment rotations. All other chains that have different decay topology must be aligned to this reference topology."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "kinematics",
+              "chains",
+              "reference_topology"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "const": "HadronicUnpolarizedIntensity"
+          }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "type",
+          "decay_description"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "domains": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "const": "phase_space"
+          },
+          "m0": {
+            "type": "number",
+            "minimum": 0
+          },
+          "final_state_masses": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            },
+            "minItems": 2
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "m0",
+          "final_state_masses"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "functions": {
+      "type": "array",
+      "description": "Definitions of functions that are used in the model.",
+      "items": {
+        "$ref": "#/definitions/Function"
+      },
+      "uniqueItems": true
+    },
+    "misc": {
+      "type": "object",
+      "properties": {
+        "amplitude_model_checksums": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "point": {
+                "type": "string"
+              },
+              "distribution": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "point",
+              "distribution",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "parameter_points": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "name",
+              "parameters"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "four_vectors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "E": {
+                      "type": "number"
+                    },
+                    "px": {
+                      "type": "number"
+                    },
+                    "py": {
+                      "type": "number"
+                    },
+                    "pz": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "index",
+                    "E",
+                    "px",
+                    "py",
+                    "pz"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "four_vectors"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "format_version": {
+      "const": "0.1"
+    }
+  },
+  "required": [
+    "format_version",
+    "distributions",
+    "functions",
+    "domains",
+    "parameter_points",
+    "misc"
+  ],
+  "type": "object"
+}

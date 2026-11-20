@@ -32,14 +32,23 @@
             }
           ]
         },
-        "reference_topology": [[2, 3], 1],
+        "reference_topology": [
+          [
+            2,
+            3
+          ],
+          1
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
-                "parametrization": "R(768)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "-0.12012506941576646 - 0.0i",
@@ -48,26 +57,44 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L0"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+rhopiS"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [1, 2],
-                "parametrization": "R(768)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "0.12012506941576646 + 0.0i",
@@ -76,26 +103,44 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L0"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+rhopiS"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
-                "parametrization": "R(768)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "0.011929004311473054 + 0.03779700129642433i",
@@ -104,26 +149,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "1",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+rhopiD"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [1, 2],
-                "parametrization": "R(768)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "-0.011929004311473054 - 0.03779700129642433i",
@@ -132,26 +195,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "1",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+rhopiD"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
-                "parametrization": "R(600)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_600_"
               }
             ],
             "weight": "0.24367979070784807 - 0.33431568424813957i",
@@ -160,26 +241,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(600)_l0"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_600__l0"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+(pipi)_SpiP"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [1, 2],
-                "parametrization": "R(600)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_600_"
               }
             ],
             "weight": "0.24367979070784807 - 0.33431568424813957i",
@@ -188,26 +287,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(600)_l0"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_600__l0"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+(pipi)_SpiP"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [2, 3],
-                "parametrization": "R(1274)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.040206820545245714 + 0.0745609331830681i",
@@ -216,26 +333,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "2",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+f2piP"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [1, 2],
-                "parametrization": "R(1274)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.040206820545245714 + 0.0745609331830681i",
@@ -244,26 +379,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+f2piP"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [2, 3],
-                "parametrization": "R(1274)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.10361071290652465 + 0.16432602844516i",
@@ -272,26 +425,44 @@
                 "type": "ls",
                 "l": "3",
                 "s": "2",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+f2piF"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [1, 2],
-                "parametrization": "R(1274)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.10361071290652465 + 0.16432602844516i",
@@ -300,26 +471,44 @@
                 "type": "ls",
                 "l": "3",
                 "s": "2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+f2piF"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
-                "parametrization": "R(965)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_965_"
               }
             ],
             "weight": "0.03765739909148283 + 0.04895293718480279i",
@@ -328,26 +517,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(965)_l0"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_965__l0"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+f0(980)piP"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [1, 2],
-                "parametrization": "R(965)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_965_"
               }
             ],
             "weight": "0.03765739909148283 + 0.04895293718480279i",
@@ -356,26 +563,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(965)_l0"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_965__l0"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+f0(980)piP"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [2, 3],
-                "parametrization": "R(1690)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "0.37222294733308686 - 0.3798993880573993i",
@@ -384,26 +609,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+rho3piD"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [1, 2],
-                "parametrization": "R(1690)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "-0.37222294733308686 + 0.3798993880573993i",
@@ -412,26 +655,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+rho3piD"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [2, 3],
-                "parametrization": "R(1690)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "1.0800157835887783 - 0.30439088941106834i",
@@ -440,26 +701,44 @@
                 "type": "ls",
                 "l": "4",
                 "s": "3",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L4"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1++)0+rho3piG"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [1, 2],
-                "parametrization": "R(1690)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "-1.0800157835887783 + 0.30439088941106834i",
@@ -468,18 +747,33 @@
                 "type": "ls",
                 "l": "4",
                 "s": "3",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L4"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1++)0+rho3piG"
           }
         ]
@@ -517,14 +811,23 @@
             }
           ]
         },
-        "reference_topology": [[2, 3], 1],
+        "reference_topology": [
+          [
+            2,
+            3
+          ],
+          1
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
-                "parametrization": "R(768)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "-0.0036159432575573903 + 0.04180024616911908i",
@@ -533,26 +836,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(1-+)1+rhopiP"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [1, 2],
-                "parametrization": "R(768)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "0.0036159432575573903 - 0.04180024616911908i",
@@ -561,18 +882,33 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(1-+)1+rhopiP"
           }
         ]
@@ -610,14 +946,23 @@
             }
           ]
         },
-        "reference_topology": [[2, 3], 1],
+        "reference_topology": [
+          [
+            2,
+            3
+          ],
+          1
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
-                "parametrization": "R(768)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "-0.013238440295890615 - 0.03963789080047194i",
@@ -626,26 +971,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "1",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(2++)1+rhopiD"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [1, 2],
-                "parametrization": "R(768)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "0.013238440295890615 + 0.03963789080047194i",
@@ -654,26 +1017,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "1",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(2++)1+rhopiD"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [2, 3],
-                "parametrization": "R(1274)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "-0.02736543032431113 + 0.06514127348735166i",
@@ -682,26 +1063,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "2",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(2++)1+f2piP"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [1, 2],
-                "parametrization": "R(1274)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "-0.02736543032431113 + 0.06514127348735166i",
@@ -710,26 +1109,44 @@
                 "type": "ls",
                 "l": "1",
                 "s": "2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(2++)1+f2piP"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [2, 3],
-                "parametrization": "R(1690)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "0.0006471559622718511 - 0.007132895746526825i",
@@ -738,26 +1155,44 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(2++)1+rho3piD"
           },
           {
             "propagators": [
               {
                 "spin": "3",
-                "node": [1, 2],
-                "parametrization": "R(1690)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1690_"
               }
             ],
             "weight": "-0.0006471559622718511 + 0.007132895746526825i",
@@ -766,18 +1201,33 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1690)_l3"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1690__l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(2++)1+rho3piD"
           }
         ]
@@ -815,14 +1265,23 @@
             }
           ]
         },
-        "reference_topology": [[2, 3], 1],
+        "reference_topology": [
+          [
+            2,
+            3
+          ],
+          1
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
-                "parametrization": "R(768)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "-0.007988654701171487 + 0.10591435520241442i",
@@ -831,26 +1290,44 @@
                 "type": "ls",
                 "l": "4",
                 "s": "1",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L4"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(4++)1+rhopiG"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [1, 2],
-                "parametrization": "R(768)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_768_"
               }
             ],
             "weight": "0.007988654701171487 - 0.10591435520241442i",
@@ -859,26 +1336,44 @@
                 "type": "ls",
                 "l": "4",
                 "s": "1",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L4"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(768)_l1"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_768__l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(4++)1+rhopiG"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [2, 3],
-                "parametrization": "R(1274)"
+                "node": [
+                  2,
+                  3
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.022946554010159825 - 0.07691032308370654i",
@@ -887,26 +1382,44 @@
                 "type": "ls",
                 "l": "3",
                 "s": "2",
-                "node": [[2, 3], 1],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": "X_BlattWeisskopf_L3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [2, 3],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  2,
+                  3
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "1-(4++)1+f2piF"
           },
           {
             "propagators": [
               {
                 "spin": "2",
-                "node": [1, 2],
-                "parametrization": "R(1274)"
+                "node": [
+                  1,
+                  2
+                ],
+                "parametrization": "R_1274_"
               }
             ],
             "weight": "0.022946554010159825 - 0.07691032308370654i",
@@ -915,18 +1428,33 @@
                 "type": "ls",
                 "l": "3",
                 "s": "2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "X_BlattWeisskopf_L3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "0",
-                "node": [1, 2],
-                "formfactor": "subchannel_BlattWeisskopf_R(1274)_l2"
+                "node": [
+                  1,
+                  2
+                ],
+                "formfactor": "subchannel_BlattWeisskopf_R_1274__l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "1-(4++)1+f2piF"
           }
         ]
@@ -936,33 +1464,43 @@
   "functions": [
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.274,
       "width": 0.185,
       "ma": 0.13956755,
       "mb": 0.13956755,
       "l": 2,
       "d": 4.94,
-      "name": "R(1274)"
+      "name": "R_1274_"
     },
     {
-      "type": "generic_function",
-      "expression": "sqrt(sqrt(m_12_sq)) / (1.69^2 - m_12_sq - 1im * 1.69 * 0.19)",
-      "name": "R(1690)"
+      "type": "expression_function",
+      "expression": "sqrt(sqrt(sigma)) / (1.69^2 - sigma - complex(0, 1) * 1.69 * 0.19)",
+      "name": "R_1690_",
+      "arguments": [
+        "sigma"
+      ],
+      "parameters": {}
     },
     {
-      "type": "generic_function",
-      "expression": "1.0 / (0.1131 / (m_12_sq + 0.0073999) + 0.0337 - 0.3185 * (m_12_sq / 0.982657846681 - 1.0) - 0.0942 * (m_12_sq / 0.982657846681 - 1.0)^2 -0.5927 * (m_12_sq / 0.982657846681 - 1.0)^3 - i * sqrt(1 - 4*0.13956755^2 / m_12_sq))",
-      "name": "R(600)"
+      "type": "expression_function",
+      "expression": "1.0 / (0.1131 / (sigma + 0.0073999) + 0.0337 - 0.3185 * (sigma / 0.982657846681 - 1.0) - 0.0942 * (sigma / 0.982657846681 - 1.0)^2 -0.5927 * (sigma / 0.982657846681 - 1.0)^3 - complex(0, 1) * sqrt(1 - 4*0.13956755^2 / sigma))",
+      "name": "R_600_",
+      "arguments": [
+        "sigma"
+      ],
+      "parameters": {}
     },
     {
-      "type": "generic_function",
-      "expression": "1 / (0.7685^2 - m_12_sq - i * 0.7685 * 0.1507 * sqrt(m_12_sq / 4 - 0.13956755^2)^3 / sqrt(0.7685^2 / 4 - 0.13956755^2)^3 * (1+sqrt(0.7685^2 / 4 - 0.13956755^2)^2*4.94^2) / (1+sqrt(m_12_sq / 4 - 0.13956755^2)^2*4.94^2))",
-      "name": "R(768)"
+      "type": "expression_function",
+      "expression": "1 / (0.7685^2 - sigma - complex(0, 1) * 0.7685 * 0.1507 * sqrt(sigma / 4 - 0.13956755^2)^3 / sqrt(0.7685^2 / 4 - 0.13956755^2)^3 * (1+sqrt(0.7685^2 / 4 - 0.13956755^2)^2*4.94^2) / (1+sqrt(sigma / 4 - 0.13956755^2)^2*4.94^2))",
+      "name": "R_768_",
+      "arguments": [
+        "sigma"
+      ],
+      "parameters": {}
     },
     {
       "type": "MultichannelBreitWigner",
-      "x": "m_12_sq",
       "mass": 0.965,
       "channels": [
         {
@@ -974,14 +1512,13 @@
         },
         {
           "gsq": 0.69465,
-
           "ma": 0.493677,
           "mb": 0.493677,
           "l": 0,
           "d": 1.0
         }
       ],
-      "name": "R(965)"
+      "name": "R_965_"
     },
     {
       "type": "BlattWeisskopf",
@@ -1017,36 +1554,40 @@
       "type": "BlattWeisskopf",
       "l": 2,
       "radius": 4.94,
-      "name": "subchannel_BlattWeisskopf_R(1274)_l2"
+      "name": "subchannel_BlattWeisskopf_R_1274__l2"
     },
     {
       "type": "BlattWeisskopf",
       "l": 3,
       "radius": 4.94,
-      "name": "subchannel_BlattWeisskopf_R(1690)_l3"
+      "name": "subchannel_BlattWeisskopf_R_1690__l3"
     },
     {
       "type": "BlattWeisskopf",
       "l": 0,
       "radius": 1.0,
-      "name": "subchannel_BlattWeisskopf_R(600)_l0"
+      "name": "subchannel_BlattWeisskopf_R_600__l0"
     },
     {
       "type": "BlattWeisskopf",
       "l": 1,
       "radius": 4.94,
-      "name": "subchannel_BlattWeisskopf_R(768)_l1"
+      "name": "subchannel_BlattWeisskopf_R_768__l1"
     },
     {
       "type": "BlattWeisskopf",
       "l": 0,
       "radius": 1.0,
-      "name": "subchannel_BlattWeisskopf_R(965)_l0"
+      "name": "subchannel_BlattWeisskopf_R_965__l0"
     }
   ],
   "domains": [
     {
-      "final_state_masses": [0.13956755, 0.13956755, 0.13956755],
+      "final_state_masses": [
+        0.13956755,
+        0.13956755,
+        0.13956755
+      ],
       "m0": 1.55,
       "name": "default",
       "type": "phase_space"
@@ -1133,31 +1674,6 @@
         "distribution": "compass_3pi_JP=4+_M=1_1540_1560",
         "point": "validation_point4",
         "value": 0.1058334409901948
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "R(1274)",
-        "value": "1.682682255119889 + 0.62086927105196i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "R(1690)",
-        "value": "0.5643082293246228 + 0.10318283266108788i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "R(600)",
-        "value": "0.10172436035046228 + 1.0273440332286132i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "R(768)",
-        "value": "-1.7321826562432676 + 0.6323990884902008i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "R(965)",
-        "value": "-0.9212576583634395 + 2.1470398931994485i"
       }
     ]
   },
@@ -1269,15 +1785,7 @@
           "pz": 0.5585289094743419
         }
       ]
-    },
-    {
-      "name": "validation_point_m12sq",
-      "parameters": [
-        {
-          "name": "m_12_sq",
-          "value": 1.1
-        }
-      ]
     }
-  ]
+  ],
+  "format_version": "0.1"
 }

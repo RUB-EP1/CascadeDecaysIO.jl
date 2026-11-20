@@ -32,13 +32,22 @@
             }
           ]
         },
-        "reference_topology": [[1, 2], 3],
+        "reference_topology": [
+          [
+            1,
+            2
+          ],
+          3
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -48,25 +57,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -76,25 +103,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -104,25 +149,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -132,25 +195,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -160,25 +241,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -188,25 +287,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -216,25 +333,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -244,25 +379,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -272,25 +425,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -300,25 +471,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -328,25 +517,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -356,25 +563,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -384,25 +609,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -412,25 +655,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1680_BW"
               }
             ],
@@ -440,25 +701,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1680_BW"
               }
             ],
@@ -468,25 +747,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1680_BW"
               }
             ],
@@ -496,25 +793,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1680_BW"
               }
             ],
@@ -524,25 +839,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -552,25 +885,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -580,25 +931,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -608,25 +977,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -636,25 +1023,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -664,25 +1069,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -692,25 +1115,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1800_BW"
               }
             ],
@@ -720,25 +1161,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1800"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1800_BW"
               }
             ],
@@ -748,25 +1207,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1800"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1800_BW"
               }
             ],
@@ -776,25 +1253,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1800"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1800_BW"
               }
             ],
@@ -804,25 +1299,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1800"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1810_BW"
               }
             ],
@@ -832,25 +1345,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1810"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1810_BW"
               }
             ],
@@ -860,25 +1391,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1810"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1810_BW"
               }
             ],
@@ -888,25 +1437,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1810"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1810_BW"
               }
             ],
@@ -916,25 +1483,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1810"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -944,25 +1529,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -972,25 +1575,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -1000,25 +1621,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -1028,25 +1667,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -1056,25 +1713,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1820_BW"
               }
             ],
@@ -1084,25 +1759,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1820"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1112,25 +1805,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1140,25 +1851,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1168,25 +1897,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1196,25 +1943,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1224,25 +1989,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1830_BW"
               }
             ],
@@ -1252,25 +2035,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1830"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1280,25 +2081,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1308,25 +2127,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1336,25 +2173,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1364,25 +2219,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1392,25 +2265,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L1890_BW"
               }
             ],
@@ -1420,25 +2311,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L1890"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1448,25 +2357,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1476,25 +2403,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1504,25 +2449,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1532,25 +2495,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1560,25 +2541,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "9/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "7/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2100_BW"
               }
             ],
@@ -1588,25 +2587,43 @@
                 "type": "ls",
                 "l": "5",
                 "s": "9/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l5"
               },
               {
                 "type": "ls",
                 "l": "4",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l4"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2100"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1616,25 +2633,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1644,25 +2679,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1672,25 +2725,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l2"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1700,25 +2771,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1728,25 +2817,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "5/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2110_BW"
               }
             ],
@@ -1756,25 +2863,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "3",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l3"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2110"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1784,25 +2909,43 @@
                 "type": "ls",
                 "l": "3",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l3"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1812,25 +2955,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "7/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1840,25 +3001,43 @@
                 "type": "ls",
                 "l": "4",
                 "s": "9/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l4"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1868,25 +3047,43 @@
                 "type": "ls",
                 "l": "5",
                 "s": "9/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l5"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1896,25 +3093,43 @@
                 "type": "ls",
                 "l": "5",
                 "s": "11/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l5"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "9/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "L2350_BW"
               }
             ],
@@ -1924,25 +3139,43 @@
                 "type": "ls",
                 "l": "6",
                 "s": "11/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l6"
               },
               {
                 "type": "ls",
                 "l": "5",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l5"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "L2350"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -1952,25 +3185,43 @@
                 "type": "ls",
                 "l": "0",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": ""
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -1980,25 +3231,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "1/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "MomentumPower1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -2008,25 +3277,43 @@
                 "type": "ls",
                 "l": "1",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "MomentumPower1"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -2036,25 +3323,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "3/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "MomentumPower2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -2064,25 +3369,43 @@
                 "type": "ls",
                 "l": "2",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "MomentumPower2"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "LNR30_NR"
               }
             ],
@@ -2092,18 +3415,33 @@
                 "type": "ls",
                 "l": "3",
                 "s": "5/2",
-                "node": [[1, 2], 3],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "MomentumPower3"
               },
               {
                 "type": "ls",
                 "l": "2",
                 "s": "1/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "MomentumPower2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "LNR3O"
           }
         ]
@@ -2113,7 +3451,6 @@
   "functions": [
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.89,
       "width": 0.12,
       "ma": 0.938,
@@ -2130,7 +3467,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.8,
       "width": 0.2,
       "ma": 0.938,
@@ -2147,7 +3483,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.519,
       "width": 0.016,
       "ma": 0.938,
@@ -2169,7 +3504,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 2.09,
       "width": 0.25,
       "ma": 0.938,
@@ -2180,7 +3514,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.674,
       "width": 0.03,
       "ma": 0.938,
@@ -2191,7 +3524,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 2.35,
       "width": 0.15,
       "ma": 0.938,
@@ -2202,7 +3534,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.6,
       "width": 0.2,
       "ma": 0.938,
@@ -2218,13 +3549,13 @@
     },
     {
       "type": "Polynomial",
-      "coefficients": [1.0],
-      "x": "m_12_sq",
+      "coefficients": [
+        1.0
+      ],
       "name": "LNR30_NR"
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.79,
       "width": 0.11,
       "ma": 0.938,
@@ -2235,7 +3566,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.82,
       "width": 0.08,
       "ma": 0.938,
@@ -2252,7 +3582,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.825,
       "width": 0.09,
       "ma": 0.938,
@@ -2263,7 +3592,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 2.1,
       "width": 0.2,
       "ma": 0.938,
@@ -2298,7 +3626,6 @@
     {
       "name": "L1405_Flatte",
       "type": "MultichannelBreitWigner",
-      "x": "m_12_sq",
       "mass": 1.405,
       "channels": [
         {
@@ -2319,7 +3646,6 @@
     },
     {
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "mass": 1.69,
       "width": 0.07,
       "ma": 0.938,
@@ -2355,7 +3681,11 @@
   ],
   "domains": [
     {
-      "final_state_masses": [0.938, 0.493, 0.0],
+      "final_state_masses": [
+        0.938,
+        0.493,
+        0.0
+      ],
       "m0": 5.62,
       "name": "default",
       "type": "phase_space"
@@ -2377,76 +3707,6 @@
         "point": "validation_point3",
         "distribution": "default_model",
         "value": 38.286728742769384
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1405_Flatte",
-        "value": "-0.740197550450631 + 0.23636822774611727i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1890_BW",
-        "value": "2.198693289424333 + 1.0366413279995204i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1800_BW",
-        "value": "0.3117344649326182 + 2.7741995686483376i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1520_BW",
-        "value": "-0.6431712763866598 + 0.5539481728042333i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L2110_BW",
-        "value": "0.8540683809737195 + 0.0415635681035755i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1680_BW",
-        "value": "-2.4613302416589518 + 0.36109808787606623i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L2350_BW",
-        "value": "0.43057041569422266 + 0.00019710073244917788i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1600_BW",
-        "value": "-0.6293313194817324 + 0.7663369213404696i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1810_BW",
-        "value": "0.1064360891979254 + 5.093985975099388i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1820_BW",
-        "value": "4.647408096395898 + 4.443944768616481i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1830_BW",
-        "value": "3.824528421578999 + 3.827749839464702i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L2100_BW",
-        "value": "0.8262246387007841 + 0.013532417439695257i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "L1690_BW",
-        "value": "-1.8597288296334098 + 1.396126484908448i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "LNR30_NR",
-        "value": "1.0 + 0.0i"
       }
     ]
   },
@@ -2531,15 +3791,7 @@
           "pz": -1.7343578060498221
         }
       ]
-    },
-    {
-      "name": "validation_point_m12sq",
-      "parameters": [
-        {
-          "name": "m_12_sq",
-          "value": 3.2
-        }
-      ]
     }
-  ]
+  ],
+  "format_version": "0.1"
 }
