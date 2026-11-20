@@ -1,9 +1,6 @@
-# API Reference
-
-```@meta
-CurrentModule = CascadeDecaysIO
-```
+# API reference
 
 ```@autodocs
 Modules = [CascadeDecaysIO]
+Private = false
 ```

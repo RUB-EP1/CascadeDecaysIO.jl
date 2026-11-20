@@ -1,0 +1,23 @@
+name: Reusable test
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        default: '1'
+      os:
+        type: string
+        default: ubuntu-latest
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ inputs.version }}
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1

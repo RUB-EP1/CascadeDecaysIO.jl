@@ -35,91 +35,27 @@ import CascadeDecays:
     root_two_j,
     unpolarized_intensity
 
-export SystemMasses,
-    CascadeSystem
+export SystemMasses, CascadeSystem
+export serializeToDict, dict2instance, phaseSpaceDomain, fourVectorPoint,
+    kinematicTask, phaseSpaceEvent, validationEvents, validationSection, validate,
+    ExpressionFunction, Site, ModelIOContext, LoadedModel, CascadeBackend,
+    ThreeBodyBackend, read_document, build_model, write_document, document,
+    validate_document, remap_context, set_parameters
 
-"""
-    SystemMasses(m1, m2, ...; m0)
-
-Masses of the external particles in GeV. Final-state masses are positional; the
-mass of the decaying particle is given as keyword `m0`. The amplitude-serialization
-standard requires them in `kinematics` and in the `phase_space` domain.
-"""
-struct SystemMasses{Nf, T <: Real}
-    finals::SVector{Nf, T}
-    m0::T
-end
-
-function SystemMasses(ms...; m0)
-    mass_tuple = Tuple(ms)
-    length(mass_tuple) >= 1 ||
-        throw(ArgumentError("provide at least one final-state mass before `m0`"))
-    T = promote_type(typeof(m0), map(typeof, mass_tuple)...)
-    return SystemMasses{length(mass_tuple), T}(
-        SVector{length(mass_tuple), T}(mass_tuple),
-        convert(T, m0),
-    )
-end
-
-function SystemMasses(ms::ThreeBodyDecays.MassTuple)
-    return SystemMasses(ms.m1, ms.m2, ms.m3; m0 = ms.m0)
-end
-
-Base.:(==)(a::SystemMasses, b::SystemMasses) =
-    a.m0 == b.m0 && a.finals == b.finals
-
-"""
-    CascadeSystem(spins, masses)
-
-External information (spins and masses) for cascade decay model kinematics serialization.
-`spins` can be a `SystemSpins` or `SystemSpinParities` from `CascadeDecays`.
-`masses` is a `SystemMasses`.
-"""
-struct CascadeSystem{Nf, Tm, Q <: Union{SystemSpins{Nf}, SystemSpinParities{Nf}}}
-    quantum::Q
-    masses::SystemMasses{Nf, Tm}
-end
-
-function CascadeSystem(spins::SystemSpins{Nf}, masses::SystemMasses{Nf, Tm}) where {Nf, Tm}
-    return CascadeSystem{Nf, Tm, typeof(spins)}(spins, masses)
-end
-
-function CascadeSystem(quantum::SystemSpinParities{Nf}, masses::SystemMasses{Nf, Tm}) where {Nf, Tm}
-    return CascadeSystem{Nf, Tm, typeof(quantum)}(quantum, masses)
-end
-
-final_two_js(system::CascadeSystem) = final_two_js(system.quantum)
-root_two_j(system::CascadeSystem) = root_two_j(system.quantum)
-final_masses(system::CascadeSystem) = system.masses.finals
-root_mass(system::CascadeSystem) = system.masses.m0
-
-export amplitudeSerializationDict,
-    appendFunction!,
-    serializeToDict,
-    setDistributions!,
-    setDomains!,
-    setFunctions!,
-    setMisc!,
-    setParameterPoints!,
-    setSection!,
-    setValidation!,
-    writeJson,
-    dict2instance,
-    readJson,
-    phaseSpaceDomain,
-    fourVectorPoint,
-    kinematicTask,
-    phaseSpaceEvent,
-    validationEvents,
-    validationSection,
-    validate,
-    GenericFunction,
-    NamedLineshape
-
-include("lineshapes.jl")
-include("generic_function.jl")
+include("types.jl")
+include("parsing.jl")
+include("expression.jl")
+include("codecs.jl")
 include("writer.jl")
-include("validation.jl")
 include("reader.jl")
+include("parameters.jl")
+include("context.jl")
+include("checks.jl")
+include("schema.jl")
+include("phase_space.jl")
+include("validation.jl")
+include("cascade.jl")
+include("threebody.jl")
+include("document.jl")
 
 end

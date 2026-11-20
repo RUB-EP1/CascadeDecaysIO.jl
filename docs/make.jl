@@ -1,24 +1,6 @@
 using CascadeDecaysIO
 using Documenter
 
-const DOCS = @__DIR__
-const QMD = joinpath(DOCS, "writer_workflow.qmd")
-const GFM = joinpath(DOCS, "writer_workflow.md")
-const TUTORIAL = joinpath(DOCS, "src", "writer-workflow.md")
-
-function render_writer_workflow!()
-    cd(DOCS) do
-        run(`quarto render $(basename(QMD)) --to gfm`)
-    end
-    isfile(GFM) || error("expected Quarto output at $(GFM)")
-end
-
-function documenter_tutorial_page(gfm_path::AbstractString)
-    body = read(gfm_path, String)
-    meta = "```@meta\nCurrentModule = CascadeDecaysIO\nEditURL = \"../writer_workflow.qmd\"\n```\n\n"
-    return meta * body
-end
-
 DocMeta.setdocmeta!(
     CascadeDecaysIO,
     :DocTestSetup,
@@ -26,8 +8,6 @@ DocMeta.setdocmeta!(
     recursive = true,
 )
 
-render_writer_workflow!()
-write(TUTORIAL, documenter_tutorial_page(GFM))
 
 makedocs(;
     modules = [CascadeDecaysIO],
@@ -48,4 +28,6 @@ makedocs(;
     ],
 )
 
-deploydocs(; repo = "github.com/RUB-EP1/CascadeDecaysIO.jl")
+if get(ENV, "CI", "false") == "true"
+    deploydocs(; repo = "github.com/RUB-EP1/CascadeDecaysIO.jl")
+end

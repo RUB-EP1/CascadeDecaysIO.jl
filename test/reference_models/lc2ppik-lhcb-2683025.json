@@ -32,13 +32,22 @@
             }
           ]
         },
-        "reference_topology": [[3, 1], 2],
+        "reference_topology": [
+          [
+            3,
+            1
+          ],
+          2
+        ],
         "chains": [
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -46,26 +55,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1405_Flatte"
               }
             ],
@@ -73,26 +106,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1405"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -100,26 +157,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1520_BW"
               }
             ],
@@ -127,26 +208,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1520"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -154,26 +259,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1600_BW"
               }
             ],
@@ -181,26 +310,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1600"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1670_BW"
               }
             ],
@@ -208,26 +361,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1670_BW"
               }
             ],
@@ -235,26 +412,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1670"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -262,26 +463,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L1690_BW"
               }
             ],
@@ -289,26 +514,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "-",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L1690"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L2000_BW"
               }
             ],
@@ -316,26 +565,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L2000"
           },
           {
             "propagators": [
               {
                 "spin": "1/2",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "parametrization": "L2000_BW"
               }
             ],
@@ -343,26 +616,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[3, 1], 2],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    3,
+                    1
+                  ],
+                  2
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "1/2"],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
                 "parity_factor": "+",
-                "node": [3, 1],
+                "node": [
+                  3,
+                  1
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[3, 1], 2],
+            "topology": [
+              [
+                3,
+                1
+              ],
+              2
+            ],
             "name": "L2000"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1232_BW"
               }
             ],
@@ -370,26 +667,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1232"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1232_BW"
               }
             ],
@@ -397,26 +718,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1232"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1600_BW"
               }
             ],
@@ -424,26 +769,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1600"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1600_BW"
               }
             ],
@@ -451,26 +820,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1600"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1700_BW"
               }
             ],
@@ -478,26 +871,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "-1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "-",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1700"
           },
           {
             "propagators": [
               {
                 "spin": "3/2",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "parametrization": "D1700_BW"
               }
             ],
@@ -505,26 +922,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1/2", "0"],
-                "node": [[1, 2], 3],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
+                "node": [
+                  [
+                    1,
+                    2
+                  ],
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_b_decay_l1"
               },
               {
                 "type": "parity",
-                "helicities": ["1/2", "0"],
+                "helicities": [
+                  "1/2",
+                  "0"
+                ],
                 "parity_factor": "-",
-                "node": [1, 2],
+                "node": [
+                  1,
+                  2
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l2"
               }
             ],
-            "topology": [[1, 2], 3],
+            "topology": [
+              [
+                1,
+                2
+              ],
+              3
+            ],
             "name": "D1700"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K700_BuggBW"
               }
             ],
@@ -532,26 +973,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K700"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K700_BuggBW"
               }
             ],
@@ -559,26 +1024,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "-1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "-1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K700"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K892_BW"
               }
             ],
@@ -586,26 +1075,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["-1", "-1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "-1",
+                  "-1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K892"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K892_BW"
               }
             ],
@@ -613,26 +1126,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K892"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K892_BW"
               }
             ],
@@ -640,26 +1177,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "-1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "-1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K892"
           },
           {
             "propagators": [
               {
                 "spin": "1",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K892_BW"
               }
             ],
@@ -667,26 +1228,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["1", "1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "1",
+                  "1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": "BlattWeisskopf_resonance_l1"
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K892"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K1430_BuggBW"
               }
             ],
@@ -694,26 +1279,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K1430"
           },
           {
             "propagators": [
               {
                 "spin": "0",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "parametrization": "K1430_BuggBW"
               }
             ],
@@ -721,32 +1330,50 @@
             "vertices": [
               {
                 "type": "helicity",
-                "helicities": ["0", "-1/2"],
-                "node": [[2, 3], 1],
+                "helicities": [
+                  "0",
+                  "-1/2"
+                ],
+                "node": [
+                  [
+                    2,
+                    3
+                  ],
+                  1
+                ],
                 "formfactor": ""
               },
               {
                 "type": "parity",
-                "helicities": ["0", "0"],
+                "helicities": [
+                  "0",
+                  "0"
+                ],
                 "parity_factor": "+",
-                "node": [2, 3],
+                "node": [
+                  2,
+                  3
+                ],
                 "formfactor": ""
               }
             ],
-            "topology": [[2, 3], 1],
+            "topology": [
+              [
+                2,
+                3
+              ],
+              1
+            ],
             "name": "K1430"
           }
-        ],
-        "appendix": {}
-      },
-      "parameters": []
+        ]
+      }
     }
   ],
   "functions": [
     {
       "name": "L1405_Flatte",
       "type": "MultichannelBreitWigner",
-      "x": "m_31_sq",
       "mass": 1.4051,
       "channels": [
         {
@@ -770,7 +1397,6 @@
       "l": 2,
       "mb": 0.938272046,
       "type": "BreitWigner",
-      "x": "m_31_sq",
       "d": 1.5,
       "mass": 1.69,
       "ma": 0.493677,
@@ -781,7 +1407,6 @@
       "l": 1,
       "mb": 0.13957018,
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "d": 1.5,
       "mass": 1.232,
       "ma": 0.938272046,
@@ -792,7 +1417,6 @@
       "l": 2,
       "mb": 0.938272046,
       "type": "BreitWigner",
-      "x": "m_31_sq",
       "d": 1.5,
       "mass": 1.518467,
       "ma": 0.493677,
@@ -803,7 +1427,6 @@
       "l": 1,
       "mb": 0.938272046,
       "type": "BreitWigner",
-      "x": "m_31_sq",
       "d": 1.5,
       "mass": 1.63,
       "ma": 0.493677,
@@ -814,7 +1437,6 @@
       "l": 0,
       "mb": 0.938272046,
       "type": "BreitWigner",
-      "x": "m_31_sq",
       "d": 1.5,
       "mass": 1.98819,
       "ma": 0.493677,
@@ -825,7 +1447,6 @@
       "l": 1,
       "mb": 0.13957018,
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "d": 1.5,
       "mass": 1.64,
       "ma": 0.938272046,
@@ -836,7 +1457,6 @@
       "l": 2,
       "mb": 0.13957018,
       "type": "BreitWigner",
-      "x": "m_12_sq",
       "d": 1.5,
       "mass": 1.69,
       "ma": 0.938272046,
@@ -847,7 +1467,6 @@
       "l": 1,
       "mb": 0.493677,
       "type": "BreitWigner",
-      "x": "m_23_sq",
       "d": 1.5,
       "mass": 0.8955,
       "ma": 0.13957018,
@@ -855,20 +1474,27 @@
     },
     {
       "name": "K700_BuggBW",
-      "type": "generic_function",
-      "expression": "1/(0.824^2 - σ - i * 0.824 * (σ - 0.23397706275638377) / (0.824^2 - 0.23397706275638377) * 0.478 * exp(-0.941060 * σ))"
+      "type": "expression_function",
+      "expression": "1/(0.824^2 - sigma - complex(0, 1) * 0.824 * (sigma - 0.23397706275638377) / (0.824^2 - 0.23397706275638377) * 0.478 * exp(-0.941060 * sigma))",
+      "arguments": [
+        "sigma"
+      ],
+      "parameters": {}
     },
     {
       "name": "K1430_BuggBW",
-      "type": "generic_function",
-      "expression": "1/(1.375^2 - σ - i * 1.375 * (σ - 0.23397706275638377) / (1.375^2 - 0.23397706275638377) * 0.190 * exp(-0.020981 * σ))"
+      "type": "expression_function",
+      "expression": "1/(1.375^2 - sigma - complex(0, 1) * 1.375 * (sigma - 0.23397706275638377) / (1.375^2 - 0.23397706275638377) * 0.190 * exp(-0.020981 * sigma))",
+      "arguments": [
+        "sigma"
+      ],
+      "parameters": {}
     },
     {
       "name": "L1670_BW",
       "l": 0,
       "mb": 0.938272046,
       "type": "BreitWigner",
-      "x": "m_31_sq",
       "d": 1.5,
       "mass": 1.67,
       "ma": 0.493677,
@@ -895,7 +1521,11 @@
   ],
   "domains": [
     {
-      "final_state_masses": [0.938272046, 0.13957018, 0.493677],
+      "final_state_masses": [
+        0.938272046,
+        0.13957018,
+        0.493677
+      ],
       "m0": 2.28646,
       "name": "default",
       "type": "phase_space"
@@ -907,56 +1537,6 @@
         "point": "validation_point",
         "distribution": "default_model",
         "value": 9345.853380852355
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L1405_Flatte",
-        "value": "-0.7480602620708737 + 0.22521439829964163i"
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L1690_BW",
-        "value": "-1.856393035564509 + 1.3970917949874666i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "D1232_BW",
-        "value": "-0.37559145211964445 + 0.2867197317591275i"
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L1520_BW",
-        "value": "-0.6519026717262323 + 0.5513711741076602i"
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L1600_BW",
-        "value": "-0.5711605382444855 + 0.8517294114907099i"
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L2000_BW",
-        "value": "1.1399027771220511 + 0.46329136172829i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "D1600_BW",
-        "value": "-0.7542612203250671 + 0.953349114487552i"
-      },
-      {
-        "point": "validation_point_m12sq",
-        "distribution": "D1700_BW",
-        "value": "-0.32420527030886465 + 0.9152170090261661i"
-      },
-      {
-        "point": "validation_point_m23sq",
-        "distribution": "K892_BW",
-        "value": "-1.6160420072107298 + 0.30076446839110044i"
-      },
-      {
-        "point": "validation_point_m31sq",
-        "distribution": "L1670_BW",
-        "value": "-2.383989898030206 + 0.34006358781864954i"
       }
     ]
   },
@@ -987,33 +1567,7 @@
           "pz": -0.011640369891121334
         }
       ]
-    },
-    {
-      "name": "validation_point_m12sq",
-      "parameters": [
-        {
-          "name": "m_12_sq",
-          "value": 3.2
-        }
-      ]
-    },
-    {
-      "name": "validation_point_m23sq",
-      "parameters": [
-        {
-          "name": "m_23_sq",
-          "value": 1.4
-        }
-      ]
-    },
-    {
-      "name": "validation_point_m31sq",
-      "parameters": [
-        {
-          "name": "m_31_sq",
-          "value": 3.2
-        }
-      ]
     }
-  ]
+  ],
+  "format_version": "0.1"
 }
