@@ -62,10 +62,6 @@ function SystemMasses(ms...; m0)
     )
 end
 
-function SystemMasses(ms::ThreeBodyDecays.MassTuple)
-    return SystemMasses(ms.m1, ms.m2, ms.m3; m0 = ms.m0)
-end
-
 Base.:(==)(a::SystemMasses, b::SystemMasses) =
     a.m0 == b.m0 && a.finals == b.finals
 
