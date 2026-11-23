@@ -14,7 +14,7 @@ This guide takes a `CascadeDecays.jl` model to an amplitude-serialization JSON f
 
 ### 1. Masses and names
 
-The standard requires the masses of the external particles. They are given as `SystemMasses` (final states in index order, initial state as `m0`) and end up in `kinematics` and in the `phase_space` domain.
+The standard requires the masses of the external particles. They are given as `SystemMasses` (final states in index order, initial state as `m0`) and end up in the `phase_space` domain, each with its particle index.
 
 ```julia
 using CascadeDecays, CascadeDecaysIO, HadronicLineshapes

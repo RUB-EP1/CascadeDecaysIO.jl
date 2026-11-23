@@ -90,8 +90,6 @@ end
 
 final_two_js(system::CascadeSystem) = final_two_js(system.quantum)
 root_two_j(system::CascadeSystem) = root_two_j(system.quantum)
-final_masses(system::CascadeSystem) = system.masses.finals
-root_mass(system::CascadeSystem) = system.masses.m0
 
 export amplitudeSerializationDict,
     appendFunction!,

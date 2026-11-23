@@ -2,15 +2,17 @@
     fourVectorPoint(name, four_vectors; domain="default")
 
 Validation point in the four-vector format: `four_vectors` are the final-state
-four-momenta (`FourVector`s) in the order of `kinematics.final_state[].index`. The
-initial state is not listed; it is `(m0, 0, 0, 0)` of the referenced domain.
+four-momenta (`FourVector`s) of the particles 1, 2, ..., written per particle index as
+`{"index": i, "p": {"E", "px", "py", "pz"}}`. The masses and the initial state
+`(m0, 0, 0, 0)` are those of the referenced `phase_space` domain.
 """
 function fourVectorPoint(name::AbstractString, four_vectors; domain::AbstractString = "default")
     return LittleDict{String,Any}(
         "name" => name,
         "domain" => domain,
-        "four_vectors" => [
-            LittleDict{String,Any}("index" => i, "E" => p.E, "px" => p.px, "py" => p.py, "pz" => p.pz)
+        "final_state" => [
+            LittleDict{String,Any}("index" => i,
+                "p" => LittleDict{String,Any}("E" => p.E, "px" => p.px, "py" => p.py, "pz" => p.pz))
             for (i, p) in enumerate(four_vectors)
         ],
     )
@@ -203,31 +205,33 @@ end
 
 _mass_squared(p) = p.E^2 - p.px^2 - p.py^2 - p.pz^2
 
+_by_index(states) = sort(collect(states); by = state -> Int(state["index"]))
+
+# final-state four-vectors of a point, in index order
 function _four_vectors(point::AbstractDict)
-    entries = sort(collect(point["four_vectors"]); by = v -> Int(v["index"]))
-    return Tuple(FourVector(Float64(v["px"]), Float64(v["py"]), Float64(v["pz"]); E = Float64(v["E"])) for v in entries)
+    momenta = (state["p"] for state in _by_index(point["final_state"]))
+    return Tuple(FourVector(Float64(p["px"]), Float64(p["py"]), Float64(p["pz"]); E = Float64(p["E"])) for p in momenta)
 end
 
-# deviation of a four-vector point from a phase_space domain
-function _phase_space_offsets(four_vectors, domain::AbstractDict)
-    masses = Float64.(domain["final_state_masses"])
-    length(masses) == length(four_vectors) ||
-        throw(ArgumentError("point has $(length(four_vectors)) four-vectors, domain \"$(domain["name"])\" $(length(masses)) masses"))
+function _phase_space_domain(point, domains)
+    name = get(point, "domain", nothing)
+    haskey(domains, name) && domains[name]["type"] == "phase_space" ||
+        throw(ArgumentError("point \"$(point["name"])\" must refer to a phase_space domain, got $(repr(name))"))
+    return domains[name]
+end
+
+# deviation of a point from its phase_space domain
+function _phase_space_offsets(point, domain::AbstractDict)
+    states, finals = _by_index(point["final_state"]), _by_index(domain["final_state"])
+    [state["index"] for state in states] == [state["index"] for state in finals] || throw(ArgumentError(
+        "point \"$(point["name"])\" and domain \"$(domain["name"])\" list different final-state particles"))
+    four_vectors = _four_vectors(point)
     # squared masses: well conditioned also for massless particles
-    mass2_offset = maximum(abs(_mass_squared(p) - m^2) for (p, m) in zip(four_vectors, masses))
+    mass2_offset = maximum(abs(_mass_squared(p) - Float64(state["mass"])^2) for (p, state) in zip(four_vectors, finals))
     total(component) = sum(p -> getproperty(p, component), four_vectors)
-    momentum_offset = max(abs(total(:E) - Float64(domain["m0"])), abs(total(:px)), abs(total(:py)), abs(total(:pz)))
+    m0 = Float64(domain["initial_state"]["mass"])
+    momentum_offset = max(abs(total(:E) - m0), abs(total(:px)), abs(total(:py)), abs(total(:pz)))
     return (; mass2_offset, momentum_offset)
-end
-
-const _NO_OFFSETS = (; mass2_offset = NaN, momentum_offset = NaN)
-
-function _point_offsets(point, four_vectors, domains)
-    haskey(point, "domain") || return _NO_OFFSETS
-    name = point["domain"]
-    haskey(domains, name) || throw(ArgumentError("point \"$(point["name"])\" refers to unknown domain \"$name\""))
-    domains[name]["type"] == "phase_space" || return _NO_OFFSETS
-    return _phase_space_offsets(four_vectors, domains[name])
 end
 
 """
@@ -235,17 +239,13 @@ end
     validate(document, cascade; distribution=1, kwargs...)
     validate(path; kwargs...)
 
-Recompute every entry of `misc.amplitude_model_checksums`:
+Recompute every entry of `misc.amplitude_model_checksums`: the unpolarized intensity
+of the named distribution at the four-vector point. The point is also checked against
+its `phase_space` domain: on-shell final states (|p² − m²| in GeV²) and total
+four-momentum `(m0, 0, 0, 0)` (in GeV), both within `atol_phase_space`.
 
-- `"distribution"` names a distribution of the document: the unpolarized intensity of
-  that distribution at the four-vector point. If the point refers to a `phase_space`
-  domain, it is also checked against it: on-shell final states (|p² − m²| in GeV²)
-  and total four-momentum `(m0, 0, 0, 0)` (in GeV), both within `atol_phase_space`.
-- `"distribution"` names a function: that function at the single parameter of the
-  point (lineshape checksum).
-
-Any other name is an error. With `cascade` given, it is used for the distribution
-selected by `distribution`; all other distributions are built from the document.
+With `cascade` given, it is used for the distribution selected by `distribution`; all
+other distributions are built from the document.
 Returns one named tuple per checksum with the expected and computed value and `passed`.
 """
 function validate(
@@ -277,21 +277,12 @@ function validate(
         point = points[checksum["point"]]
         target = checksum["distribution"]
         expected = _parse_complex(checksum["value"])
-        if target in distribution_names
-            haskey(point, "four_vectors") ||
-                throw(ArgumentError("point \"$(point["name"])\" of distribution \"$target\" has no four_vectors"))
-            four_vectors = _four_vectors(point)
-            c, task = model(target)
-            computed = unpolarized_intensity(c, KinematicPoint(task, four_vectors))
-            offsets = _point_offsets(point, four_vectors, domains)
-        elseif haskey(workspace, target)
-            computed = workspace[target](Float64(only(point["parameters"])["value"]))
-            offsets = _NO_OFFSETS
-        else
-            throw(ArgumentError("checksum refers to \"$target\", which is neither a distribution nor a function"))
-        end
-        on_domain = isnan(offsets.mass2_offset) ||
-            (offsets.mass2_offset <= atol_phase_space && offsets.momentum_offset <= atol_phase_space)
+        target in distribution_names ||
+            throw(ArgumentError("checksum refers to \"$target\", which is not a distribution"))
+        c, task = model(target)
+        computed = unpolarized_intensity(c, KinematicPoint(task, _four_vectors(point)))
+        offsets = _phase_space_offsets(point, _phase_space_domain(point, domains))
+        on_domain = offsets.mass2_offset <= atol_phase_space && offsets.momentum_offset <= atol_phase_space
         relative_difference = abs(computed - expected) / max(abs(expected), floatmin(Float64))
         push!(results, (;
             point = checksum["point"],

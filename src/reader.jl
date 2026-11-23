@@ -143,11 +143,18 @@ end
     return sort(collect(raw_finals), by = x -> x["index"])
 end
 
-function _state_mass(state)
-    haskey(state, "mass") || throw(ArgumentError("kinematics entry \"$(state["name"])\" has no mass"))
-    state["mass"] isa Real || throw(ArgumentError(
-        "mass of \"$(state["name"])\" refers to a parameter ($(repr(state["mass"]))); only numbers are supported"))
-    return Float64(state["mass"])
+# masses of the external particles from the document's phase_space domain, by index
+function _domain_masses(dict::AbstractDict, final_indices)
+    domains = [d for d in get(dict, "domains", ()) if d["type"] == "phase_space"]
+    length(domains) == 1 || throw(ArgumentError(
+        "masses are read from the phase_space domain; the document has $(length(domains))"))
+    domain = only(domains)
+    mass(state) = haskey(state, "mass") && state["mass"] isa Real ? Float64(state["mass"]) :
+        throw(ArgumentError("particle $(state["index"]) of the phase_space domain has no numeric mass"))
+    finals = Dict(Int(state["index"]) => mass(state) for state in domain["final_state"])
+    sort(collect(keys(finals))) == collect(final_indices) || throw(ArgumentError(
+        "the phase_space domain lists particles $(sort(collect(keys(finals)))), the kinematics $(collect(final_indices))"))
+    return SystemMasses((finals[i] for i in final_indices)...; m0 = mass(domain["initial_state"]))
 end
 
 """
@@ -165,14 +172,14 @@ function dict2instance(::Type{SystemSpins}, dict::AbstractDict; distribution = 1
 end
 
 """
-    dict2instance(::Type{CascadeSystem}, dict::AbstractDict; distribution=1)
+    dict2instance(::Type{CascadeSystem}, document::AbstractDict; distribution=1)
 
-Deserialize spins and masses of the external particles. Masses are required.
+Deserialize spins and masses of the external particles: spins from the `kinematics`
+of the distribution, masses from the `phase_space` domain of the document.
 """
 function dict2instance(::Type{CascadeSystem}, dict::AbstractDict; distribution = 1)
     kin = _extract_kinematics_dict(dict; distribution)
-    finals = _sorted_final_states(kin)
-    masses = SystemMasses(map(_state_mass, finals)...; m0 = _state_mass(kin["initial_state"]))
+    masses = _domain_masses(dict, [Int(f["index"]) for f in _sorted_final_states(kin)])
     return CascadeSystem(dict2instance(SystemSpins, kin), masses)
 end
 

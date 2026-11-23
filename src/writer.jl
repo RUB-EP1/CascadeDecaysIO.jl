@@ -303,8 +303,8 @@ end
 """
     serializeToDict(system::CascadeSystem; particle_labels=nothing)
 
-Serialize the external particles: name, index (0 for the decaying particle), spin
-and mass. Returns `(kinematics, appendix)`.
+Serialize the external particles: name, index (0 for the decaying particle) and spin.
+Their masses belong to the `phase_space` domain. Returns `(kinematics, appendix)`.
 """
 function serializeToDict(system::CascadeSystem; particle_labels = nothing)
     spins = system.quantum isa SystemSpinParities ? system.quantum.spins : system.quantum
@@ -318,14 +318,12 @@ function serializeToDict(system::CascadeSystem; particle_labels = nothing)
             "index" => 0,
             "name" => labels[end],
             "spin" => _spin_string(spins.two_h0),
-            "mass" => root_mass(system),
         ),
         "final_state" => [
             LittleDict{String,Any}(
                 "index" => i,
                 "name" => labels[i],
                 "spin" => _spin_string(spins.finals[i]),
-                "mass" => final_masses(system)[i],
             ) for i in 1:n_final
         ],
     )
@@ -406,14 +404,14 @@ _appendix_functions(appendix) = [appendix[name] for name in sort!(collect(keys(a
 """
     phaseSpaceDomain(masses::SystemMasses; name="default")
 
-`phase_space` domain of the decay: initial-state mass `m0` and the final-state
-masses in index order.
+`phase_space` domain of the decay, the only place of the masses in the document: the
+initial state (index 0) and the final states, each with its particle index.
 """
 phaseSpaceDomain(masses::SystemMasses; name::AbstractString = "default") = LittleDict{String,Any}(
     "name" => name,
     "type" => "phase_space",
-    "m0" => masses.m0,
-    "final_state_masses" => collect(masses.finals),
+    "initial_state" => LittleDict{String,Any}("index" => 0, "mass" => masses.m0),
+    "final_state" => [LittleDict{String,Any}("index" => i, "mass" => m) for (i, m) in enumerate(masses.finals)],
 )
 
 """

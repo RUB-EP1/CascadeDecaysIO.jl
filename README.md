@@ -62,7 +62,7 @@ all(r -> r.passed, validate(document, model2))
 ## Writing
 
 - `amplitudeSerializationDict(cascade, masses; name, particle_labels, validation, domains, propagator_names, reference_topology)` builds the document; `writeJson(path, document)` writes it. `writeJson(path, cascade, masses; kwargs...)` does both.
-- **Masses are required**: they go into `kinematics` and into the default `phase_space` domain (`phaseSpaceDomain(masses)`).
+- **Masses are required**: they go only into the default `phase_space` domain (`phaseSpaceDomain(masses)`), each with its particle index.
 - **Spins, helicities, `l` and `s`** are written as strings (`"0"`, `"1"`, `"1/2"`), weights as complex strings (`"0.5 - 0.1i"`).
 - **Names**: wrap lineshapes or form factors in `NamedLineshape("name", f)`, or pass `propagator_names` (a vector per chain or a `Dict` from node to name). Default form-factor names are `BlattWeisskopf_l<L>` and `MomentumPower_l<L>`. Two different functions with the same name are an error.
 - **Argument names**: `BreitWigner`, `MultichannelBreitWigner` and `Polynomial` carry `"x"`, as in the reference models; `generic_function` has none. The name follows the `m_ij_sq` pattern of the reference models, extended to nested nodes: `m_12_sq`, `m_12_3_sq`, `m_34_sq`. A propagator is always evaluated at the invariant mass squared of its node; `x` is a label (a function used on several nodes keeps the `x` of its first use).
@@ -117,7 +117,7 @@ results = validate("model.json")
 
 `amplitudeSerializationDict(model, masses; ...)` and `writeJson(path, model, masses; ...)` generate three points with `validationSection(model, masses; distribution = name)` unless `validation` is given (`validation = nothing`: no points). The generator (`validationEvents`, `phaseSpaceEvent`) builds events by successive isotropic two-body decays along the reference topology; internal node masses are uniform between their kinematic limits or fixed (`node_masses = Dict(node => m)`, e.g. a narrow resonance in the narrow-width approximation). An event is accepted if the intensity there is at least `min_relative_intensity` (default `0.1`) times the mean intensity of `pilot` (default `1000`) events drawn the same way; a model that vanishes on all of them, typically because a lineshape is narrower than the sampled mass range, is an error that asks for the node mass. A given event with vanishing intensity is also an error.
 
-Each event becomes a point `{"name", "domain", "four_vectors": [{"index", "E", "px", "py", "pz"}, ...]}` with a checksum `{"point", "distribution", "value"}`, where `value` is the unpolarized intensity `Σ|A|²`. `validate` recomputes every checksum with the distribution it names (or, for a lineshape checksum at a scalar point, the function it names; any other name is an error) and checks that the four-vectors lie on their `phase_space` domain: `|p² − m²|` in GeV² and the total four-momentum `(m0, 0, 0, 0)` in GeV, both within `atol_phase_space` (default `1e-8`). `kinematicTask(model)` returns the `KinematicTask` for evaluating the model on four-vectors.
+Each event becomes a point `{"name", "domain", "final_state": [{"index", "p": {"E", "px", "py", "pz"}}, ...]}` with a checksum `{"point", "distribution", "value"}`, where `value` is the unpolarized intensity `Σ|A|²`. `validate` recomputes every checksum with the distribution it names (any other name is an error), matching particles by index, and checks that the four-vectors lie on their `phase_space` domain: `|p² − m²|` in GeV² and the total four-momentum `(m0, 0, 0, 0)` in GeV, both within `atol_phase_space` (default `1e-8`). `kinematicTask(model)` returns the `KinematicTask` for evaluating the model on four-vectors.
 
 ---
 
@@ -126,7 +126,7 @@ Each event becomes a point `{"name", "domain", "four_vectors": [{"index", "E", "
 | Julia object | JSON | Read back as |
 | --- | --- | --- |
 | `CascadeDecay` + `SystemMasses` | `distributions`, `functions`, `domains`, `misc`, `parameter_points` | `readJson` / `dict2instance(CascadeDecay, dict)` |
-| `CascadeSystem` | `kinematics` (`index`, `name`, `spin`, `mass`) | `dict2instance(CascadeSystem, dict)` |
+| `CascadeSystem` | `kinematics` (`index`, `name`, `spin`) and `phase_space` domain (`index`, `mass`) | `dict2instance(CascadeSystem, dict)` |
 | `DecayChain` | `name`, `topology`, `propagators`, `vertices`, `weight` | part of `CascadeDecay` |
 | `BreitWigner` | `"BreitWigner"` | `HadronicLineshapes.BreitWigner` |
 | `MultichannelBreitWigner`, `Flatte` | `"MultichannelBreitWigner"` | `HadronicLineshapes.MultichannelBreitWigner` |
