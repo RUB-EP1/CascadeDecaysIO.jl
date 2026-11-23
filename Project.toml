@@ -5,28 +5,24 @@ authors = ["RUB-EP1"]
 
 [deps]
 CascadeDecays = "fffe189e-c188-4e56-b22b-870ae3b23d6b"
-FourVectors = "b122eb78-8380-428a-b8c8-584a022ae8b6"
 HadronicLineshapes = "49c9d978-1f9d-4e96-a984-0a9783c0b9bf"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-ThreeBodyDecays = "e6563dab-9ca1-5843-bde3-2ccf38d63843"
 
 [sources]
 CascadeDecays = {path = "../CascadeDecays.jl"}
 
 [compat]
 CascadeDecays = "0.5"
-FourVectors = "0.3.4"
 HadronicLineshapes = "0.5"
 JSON = "1"
 OrderedCollections = "1.6"
 Polynomials = "4"
 Random = "1"
 StaticArrays = "1"
-ThreeBodyDecays = "0.14"
 Test = "1"
 julia = "1.11"
 

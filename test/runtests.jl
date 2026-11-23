@@ -1,12 +1,11 @@
 using Test
 using CascadeDecays
 using CascadeDecaysIO
-using FourVectors
 using HadronicLineshapes
 using JSON
 using OrderedCollections
 using Random: Xoshiro
-using ThreeBodyDecays: RecouplingLS
+using CascadeDecays.ThreeBodyDecays: RecouplingLS
 
 struct UnknownShape end
 

@@ -206,12 +206,12 @@ function serializeToDict(h::ThreeBodyDecays.ParityRecoupling)
 end
 
 """
-    serializeToDict(vertex::ThreeBodyDecays.VertexFunction)
+    serializeToDict(vertex::Vertex)
 
 Serialize a vertex: recoupling fields plus a `"formfactor"` reference (`""` when the
 vertex has no form factor). Non-trivial form factors are returned in the appendix.
 """
-function serializeToDict(vertex::ThreeBodyDecays.VertexFunction)
+function serializeToDict(vertex::Vertex)
     formfactor_name, appendix = _serialize_formfactor(vertex.ff)
     recoupling_dict, _ = serializeToDict(vertex.h)
     vertex_dict = LittleDict{String,Any}("type" => recoupling_dict["type"])

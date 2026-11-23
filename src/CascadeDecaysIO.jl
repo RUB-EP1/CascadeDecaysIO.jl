@@ -1,16 +1,17 @@
 module CascadeDecaysIO
 
 using CascadeDecays
-using FourVectors
+# FourVectors and ThreeBodyDecays are taken from CascadeDecays, in the versions it requires
+using CascadeDecays.FourVectors: FourVector
 using HadronicLineshapes
 using JSON
 using OrderedCollections
 import Polynomials
 using Random: AbstractRNG, Xoshiro
 using StaticArrays
-using ThreeBodyDecays
 
 import CascadeDecays:
+    ThreeBodyDecays,
     CascadeDecay,
     ConstantLineshape,
     DecayChain,
