@@ -43,7 +43,7 @@ export SystemMasses,
 
 Masses of the external particles in GeV. Final-state masses are positional; the
 mass of the decaying particle is given as keyword `m0`. The amplitude-serialization
-standard requires them in `kinematics` and in the `phase_space` domain.
+standard gives them in the `phase_space` domain.
 """
 struct SystemMasses{Nf, T <: Real}
     finals::SVector{Nf, T}
@@ -71,8 +71,8 @@ Base.:(==)(a::SystemMasses, b::SystemMasses) =
 """
     CascadeSystem(spins, masses)
 
-External information (spins and masses) for cascade decay model kinematics serialization.
-`spins` can be a `SystemSpins` or `SystemSpinParities` from `CascadeDecays`.
+Spins and masses of the external particles: the spins go to `kinematics`, the masses
+to the `phase_space` domain. `spins` can be a `SystemSpins` or `SystemSpinParities` from `CascadeDecays`.
 `masses` is a `SystemMasses`.
 """
 struct CascadeSystem{Nf, Tm, Q <: Union{SystemSpins{Nf}, SystemSpinParities{Nf}}}

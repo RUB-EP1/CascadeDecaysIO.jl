@@ -279,9 +279,9 @@ function validate(
         expected = _parse_complex(checksum["value"])
         target in distribution_names ||
             throw(ArgumentError("checksum refers to \"$target\", which is not a distribution"))
+        offsets = _phase_space_offsets(point, _phase_space_domain(point, domains))
         c, task = model(target)
         computed = unpolarized_intensity(c, KinematicPoint(task, _four_vectors(point)))
-        offsets = _phase_space_offsets(point, _phase_space_domain(point, domains))
         on_domain = offsets.mass2_offset <= atol_phase_space && offsets.momentum_offset <= atol_phase_space
         relative_difference = abs(computed - expected) / max(abs(expected), floatmin(Float64))
         push!(results, (;

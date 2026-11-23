@@ -131,6 +131,7 @@ Each event becomes a point `{"name", "domain", "final_state": [{"index", "p": {"
 | `BreitWigner` | `"BreitWigner"` | `HadronicLineshapes.BreitWigner` |
 | `MultichannelBreitWigner`, `Flatte` | `"MultichannelBreitWigner"` | `HadronicLineshapes.MultichannelBreitWigner` |
 | `ConstantLineshape` (real) | `"Polynomial"`, `"coefficients": [c]` | `CascadeDecays.ConstantLineshape` |
+| `Polynomials.Polynomial` | `"Polynomial"`, `"coefficients"` (ascending powers of σ) | `Polynomials.Polynomial` |
 | `GenericFunction` / analysis serializer | `"generic_function"` | `GenericFunction` |
 | `BlattWeisskopf{L}(R)` | `"BlattWeisskopf"`, `"l"`, `"radius"` | `HadronicLineshapes.BlattWeisskopf{L}(R)` |
 | `MomentumPower{L}()` | `"MomentumPower"` | `HadronicLineshapes.MomentumPower{L}()` |

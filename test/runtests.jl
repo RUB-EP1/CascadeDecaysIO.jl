@@ -196,6 +196,10 @@ end
         reverse!(reversed["parameter_points"][1]["final_state"])
         @test validate(reversed, read_model)[1].passed
 
+        missing_particle = deepcopy(read_document)         # the point must list the particles of its domain
+        pop!(missing_particle["parameter_points"][1]["final_state"])
+        @test_throws ArgumentError validate(missing_particle, read_model)
+
         lineshape_target = deepcopy(read_document)         # every checksum is a distribution value
         lineshape_target["misc"]["amplitude_model_checksums"][1]["distribution"] = "lineshape_R2"
         @test_throws ArgumentError validate(lineshape_target, read_model)
